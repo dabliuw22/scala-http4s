@@ -1,0 +1,13 @@
+version: "3"
+services:
+  db:
+    image: "postgres"
+    container_name: "my_http4s_postgres"
+    environment:
+      - POSTGRES_USER=http4s
+      - POSTGRES_PASSWORD=http4s
+      - POSTGRES_DB=http4s_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
