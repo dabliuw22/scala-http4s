@@ -1,6 +1,5 @@
 package com.leysoft
 
-import akka.dispatch.ExecutionContexts
 import cats.data.Kleisli
 import cats.effect.{ContextShift, ExitCode, IO, IOApp, Timer}
 import com.leysoft.products.adapter.in.api.ProductRoute
@@ -13,9 +12,11 @@ import com.typesafe.scalalogging.Logger
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.slf4j.LoggerFactory
 
+import scala.concurrent.ExecutionContext
+
 object Api extends IOApp {
-  override  implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContexts.global)
-  override implicit val timer: Timer[IO] = IO.timer(ExecutionContexts.global)
+  override  implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
+  override implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
   val logger = Logger(LoggerFactory.getLogger(Api.getClass))
   implicit val doobieConfiguration: DoobieConfiguration[IO] = DoobieConfiguration[IO]
   implicit val doobieUtil: DoobieUtil[IO] = HikariDoobieUtil[IO]
