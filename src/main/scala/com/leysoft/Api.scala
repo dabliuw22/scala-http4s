@@ -8,6 +8,7 @@ import com.leysoft.products.adapter.out.doobie.config.DoobieConfiguration
 import com.leysoft.products.adapter.out.doobie.util.{DoobieUtil, HikariDoobieUtil}
 import com.leysoft.products.application.{DefaultProductService, ProductService}
 import com.leysoft.products.domain.ProductRepository
+import com.leysoft.products.domain.error.ProductNotFoundException
 import com.typesafe.scalalogging.Logger
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.slf4j.LoggerFactory
@@ -26,10 +27,19 @@ object Api extends IOApp {
   import cats.implicits._ // for <+> and BlazeServerBuilder.as
   import org.http4s.implicits._ // for orNotFound
   import org.http4s._, org.http4s.dsl.io._
+
+  implicit val errorHandler: PartialFunction[Throwable, IO[Response[IO]]] = {
+    case error: ProductNotFoundException =>
+      logger.error(s"Error: ${error.getMessage}")
+      NotFound(s"Oops....")
+    case _ =>InternalServerError(s"Oops....")
+  }
+
   val helloWorldRoute: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case GET -> Root / "hello" / name =>
       Ok(s"Hello, $name")
   }
+
   val routes: Kleisli[IO, Request[IO], Response[IO]] = (productRoute.routes <+> helloWorldRoute).orNotFound
 
   override def run(args: List[String]): IO[ExitCode] = BlazeServerBuilder[IO]
