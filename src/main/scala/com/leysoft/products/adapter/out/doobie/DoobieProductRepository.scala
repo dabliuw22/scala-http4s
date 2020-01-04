@@ -7,8 +7,18 @@ final case class DoobieProductRepository[P[_]]()(implicit doobieUtil: DoobieUtil
   import doobie.implicits._
 
   override def findBy(id: Long): P[Option[Product]] = doobieUtil
-    .execute(sql"SELECT * FROM products WHERE id = $id".query[Product].option)
+    .read(sql"SELECT * FROM products WHERE id = $id".query[Product])
 
   override def findAll: P[List[Product]] = doobieUtil
-    .execute(sql"SELECT * FROM products".query[Product].stream.compile.toList)
+    .readList(sql"SELECT * FROM products".query[Product])
+
+  override def save(product: Product): P[Int] = doobieUtil
+    .write(sql"INSERT INTO products VALUES(${product.id}, ${product.name}, ${product.stock})".update)
+
+  override def update(product: Product): P[Int] = doobieUtil
+    .write(sql"""UPDATE products SET name = ${product.name}, stock = ${product.stock}
+                 WHERE id = ${product.id}""".update)
+
+  override def delete(id: Long): P[Int] = doobieUtil
+    .write(sql"DELETE FROM products WHERE id = $id".update)
 }
