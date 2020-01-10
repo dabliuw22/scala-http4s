@@ -3,6 +3,8 @@ import sbt._
 object Dependencies {
   lazy val typeLevelParent = "org.typelevel"
   lazy val catsVersion = "2.0.0"
+  lazy val monixParent = "io.monix"
+  lazy val monixVersion = "3.1.0"
   lazy val doobieParent = "org.tpolecat"
   lazy val doobieVersion = "0.8.6"
   lazy val http4sParent = "org.http4s"
@@ -25,6 +27,8 @@ object Dependencies {
     typeLevelParent %% "cats-kernel" % catsVersion,
     typeLevelParent %% "cats-core" % catsVersion,
     typeLevelParent %% "cats-effect" % catsVersion,
+    monixParent %% "monix-eval" % monixVersion,
+    monixParent %% "monix-execution" % monixVersion,
     doobieParent %% "doobie-core" % doobieVersion,
     doobieParent %% "doobie-hikari" % doobieVersion,
     doobieParent %% "doobie-postgres" % doobieVersion,

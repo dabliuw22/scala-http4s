@@ -15,16 +15,17 @@ import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext
 
-object Api extends IOApp {
+object ApiCats extends IOApp {
   override  implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
   override implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
-  val logger = Logger(LoggerFactory.getLogger(Api.getClass))
+  val logger = Logger(LoggerFactory.getLogger(ApiCats.getClass))
   implicit val doobieConfiguration: DoobieConfiguration[IO] = DoobieConfiguration[IO]
   implicit val doobieUtil: DoobieUtil[IO] = HikariDoobieUtil[IO]
   val productRepository: ProductRepository[IO] = DoobieProductRepository[IO]
   val productService: ProductService[IO] = DefaultProductService[IO](productRepository)
   val productRoute: ProductRoute[IO] = ProductRoute[IO](productService)
   import cats.implicits._ // for <+> and BlazeServerBuilder.as
+  // import cats.syntax.apply._ // for *>, <*> or <*
   import org.http4s.implicits._ // for orNotFound
   import org.http4s._ // for Request, Response, HttpRoutes
   import org.http4s.dsl.io._ // for NotFound, Conflict, InternalServerError
