@@ -7,7 +7,7 @@ import com.leysoft.products.application.ProductService
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{HttpRoutes, Response}
 
-final case class ProductRoute[P[_]: Async: Monad](productService: ProductService[P])(implicit cf: ContextShift[P]) extends Http4sDsl[P] {
+final case class ProductRoute[P[_]: Effect: Monad](productService: ProductService[P])(implicit cf: ContextShift[P]) extends Http4sDsl[P] {
   import org.http4s.circe.CirceEntityEncoder._ // for EntityEncoder
   import org.http4s.circe.CirceEntityDecoder._ // for EntityDecoder
   import io.circe.generic.auto._ // for Encoder

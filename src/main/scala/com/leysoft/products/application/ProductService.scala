@@ -1,7 +1,7 @@
 package com.leysoft.products.application
 
 import cats.Monad
-import cats.effect.Async
+import cats.effect.Effect
 import com.leysoft.products.domain.error.{ProductNotFoundException, ProductWritingException}
 import com.leysoft.products.domain.{Product, ProductRepository}
 
@@ -18,7 +18,7 @@ trait ProductService[P[_]] {
   def remove(id: Long): P[Boolean]
 }
 
-final case class DefaultProductService[P[_]: Async: Monad](productRepository: ProductRepository[P]) extends ProductService[P] {
+final case class DefaultProductService[P[_]: Effect: Monad](productRepository: ProductRepository[P]) extends ProductService[P] {
   import cats.syntax.applicativeError._
   import cats.syntax.functor._
 

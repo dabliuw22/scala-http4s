@@ -1,9 +1,10 @@
 package com.leysoft.products.adapter.out.doobie
 
+import cats.effect.Effect
 import com.leysoft.products.adapter.out.doobie.util.DoobieUtil
-import com.leysoft.products.domain.{ProductRepository, Product}
+import com.leysoft.products.domain.{Product, ProductRepository}
 
-final case class DoobieProductRepository[P[_]]()(implicit doobieUtil: DoobieUtil[P]) extends ProductRepository[P] {
+final case class DoobieProductRepository[P[_]: Effect]()(implicit doobieUtil: DoobieUtil[P]) extends ProductRepository[P] {
   import doobie.implicits._
 
   override def findBy(id: Long): P[Option[Product]] = doobieUtil
