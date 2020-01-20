@@ -16,7 +16,7 @@ case class DoobieConfiguration[P[_]: Async]()(implicit cf: ContextShift[P]) {
 
   private val threadSize = 10
 
-  lazy val hikariTransactor: Resource[P, HikariTransactor[P]] = for {
+  lazy val transactor: Resource[P, HikariTransactor[P]] = for {
     context <- ExecutionContexts.fixedThreadPool[P](threadSize)
     blocker <- Blocker[P]
     hikari <- HikariTransactor.newHikariTransactor[P](

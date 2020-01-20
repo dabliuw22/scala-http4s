@@ -18,7 +18,7 @@ trait ProductService[P[_]] {
   def remove(id: Long): P[Boolean]
 }
 
-final case class DefaultProductService[P[_]: Effect: Monad](productRepository: ProductRepository[P]) extends ProductService[P] {
+final case class DefaultProductService[P[_]: Effect: Monad] private (productRepository: ProductRepository[P]) extends ProductService[P] {
   import cats.syntax.applicativeError._
   import cats.syntax.functor._
 
@@ -44,4 +44,10 @@ final case class DefaultProductService[P[_]: Effect: Monad](productRepository: P
     case 0 => false
     case _ => true
   }.handleError(e => throw ProductWritingException(e.getMessage))
+}
+
+object DefaultProductService {
+
+  def make[P[_]: Effect](repository: ProductRepository[P]): P[DefaultProductService[P]] =
+    Effect[P].delay(DefaultProductService[P](repository))
 }

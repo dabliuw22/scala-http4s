@@ -1,57 +1,33 @@
 package com.leysoft
 
-import cats.data.Kleisli
 import cats.effect.{ContextShift, ExitCode, IO, IOApp, Timer}
 import com.leysoft.products.adapter.in.api.ProductRoute
+import com.leysoft.products.adapter.in.api.error.ErrorHandler
 import com.leysoft.products.adapter.out.doobie.DoobieProductRepository
 import com.leysoft.products.adapter.out.doobie.config.DoobieConfiguration
-import com.leysoft.products.adapter.out.doobie.util.{DoobieUtil, HikariDoobieUtil}
-import com.leysoft.products.application.{DefaultProductService, ProductService}
-import com.leysoft.products.domain.ProductRepository
-import com.leysoft.products.domain.error.{ProductNotFoundException, ProductWritingException}
-import com.typesafe.scalalogging.Logger
+import com.leysoft.products.adapter.out.doobie.util.HikariDoobieUtil
+import com.leysoft.products.application.DefaultProductService
 import org.http4s.server.blaze.BlazeServerBuilder
-import org.slf4j.LoggerFactory
-
-import scala.concurrent.ExecutionContext
 
 object ApiCats extends IOApp {
-  override  implicit val contextShift: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
-  override implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
-  val logger = Logger(LoggerFactory.getLogger(ApiCats.getClass))
-  implicit val doobieConfiguration: DoobieConfiguration[IO] = DoobieConfiguration[IO]
-  implicit val doobieUtil: DoobieUtil[IO] = HikariDoobieUtil[IO]
-  val productRepository: ProductRepository[IO] = DoobieProductRepository[IO]
-  val productService: ProductService[IO] = DefaultProductService[IO](productRepository)
-  val productRoute: ProductRoute[IO] = ProductRoute[IO](productService)
-  import cats.implicits._ // for <+> and BlazeServerBuilder.as
-  // import cats.syntax.apply._ // for *>, <*> or <*
-  import org.http4s.implicits._ // for orNotFound
-  import org.http4s._ // for Request, Response, HttpRoutes
-  import org.http4s.dsl.io._ // for NotFound, Conflict, InternalServerError
+  // import cats.implicits._ // for <+> and BlazeServerBuilder.as
+  // import org.http4s._ // for Request, Response, HttpRoutes
+  // import org.http4s.dsl.io._ // for NotFound, Conflict, InternalServerError, Http4sDsl[IO]
 
-  implicit val errorHandler: PartialFunction[Throwable, IO[Response[IO]]] = {
-    case error: ProductNotFoundException =>
-      logger.error(s"Error: ${error.getMessage}")
-      NotFound(s"Oops....")
-    case error: ProductWritingException =>
-      logger.error(s"Error: ${error.getMessage}")
-      Conflict(s"Oops....")
-    case _ => InternalServerError(s"Oops....")
-  }
-
-  val helloWorldRoute: HttpRoutes[IO] = HttpRoutes.of[IO] {
-    case GET -> Root / "hello" / name =>
-      Ok(s"Hello, $name")
-  }
-
-  val routes: Kleisli[IO, Request[IO], Response[IO]] = (productRoute.routes <+> helloWorldRoute).orNotFound
-
-  override def run(args: List[String]): IO[ExitCode] = BlazeServerBuilder[IO]
-    .bindHttp(port = 8080, host = "localhost")
-    .withHttpApp(routes)
-    .serve
-    .compile
-    .drain
-    .as(ExitCode.Success)
+  override def run(args: List[String]): IO[ExitCode] = DoobieConfiguration[IO].transactor
+    .use { transactor =>
+      for {
+        db <- HikariDoobieUtil.make[IO](transactor)
+        repository <- DoobieProductRepository.make[IO](db)
+        service <- DefaultProductService.make[IO](repository)
+        api <- ProductRoute.make[IO](service)
+        error <- ErrorHandler.make[IO]
+        _ <- BlazeServerBuilder[IO]
+          .bindHttp(port = 8080, host = "localhost")
+          .withHttpApp(api.routes(error.handler))
+          .serve
+          .compile
+          .drain
+      } yield ExitCode.Success
+    }
 }

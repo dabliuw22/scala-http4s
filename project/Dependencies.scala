@@ -1,3 +1,4 @@
+import Dependencies.chrisdavenportParent
 import sbt._
 
 object Dependencies {
@@ -17,6 +18,8 @@ object Dependencies {
   lazy val logbackVersion = "1.2.3"
   lazy val logbackEncoderParent = "net.logstash.logback"
   lazy val logbackEncoderVersion = "6.3"
+  lazy val chrisdavenportParent = "io.chrisdavenport"
+  lazy val chrisdavenportVersion = "1.0.1"
   lazy val scalaTestParent = "org.scalatest"
   lazy val scalaTestVersion = "3.0.8"
   lazy val scalaMockParent = "org.scalamock"
@@ -39,7 +42,9 @@ object Dependencies {
     circeParent %% "circe-literal" % circeVersion,
     scalaLoggingParent %% "scala-logging" % scalaLoggingVersion,
     logbackParent % "logback-classic" % logbackVersion,
-    logbackEncoderParent % "logstash-logback-encoder" % logbackEncoderVersion
+    logbackEncoderParent % "logstash-logback-encoder" % logbackEncoderVersion,
+    chrisdavenportParent %% "log4cats-core" % chrisdavenportVersion,
+    chrisdavenportParent %% "log4cats-slf4j" % chrisdavenportVersion
   )
 
   val testDependencies = Seq(

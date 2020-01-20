@@ -1,13 +1,13 @@
 package com.leysoft.products.adapter.in.api
 
 import cats.Monad
-import cats.effect.{Async, ContextShift, Effect}
+import cats.effect.{Async, Effect}
 import com.leysoft.products.domain.Product
 import com.leysoft.products.application.ProductService
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{HttpRoutes, Response}
 
-final case class ProductRoute[P[_]: Effect: Monad](productService: ProductService[P])(implicit cf: ContextShift[P]) extends Http4sDsl[P] {
+final case class ProductRoute[P[_]: Effect] private (productService: ProductService[P]) extends Http4sDsl[P] {
   import org.http4s.circe.CirceEntityEncoder._ // for EntityEncoder
   import org.http4s.circe.CirceEntityDecoder._ // for EntityDecoder
   import io.circe.generic.auto._ // for Encoder
@@ -15,10 +15,11 @@ final case class ProductRoute[P[_]: Effect: Monad](productService: ProductServic
   import cats.syntax.applicativeError._ // for recoverWith and handleErrorWith
   import cats.syntax.functor._ // for map
   import cats.syntax.flatMap._ // for flatMap
+  import org.http4s.implicits._ // for orNotFound
 
   private val PRODUCTS = "products"
 
-  def routes(implicit errorHandler: PartialFunction[Throwable, P[Response[P]]]): HttpRoutes[P] = HttpRoutes.of[P] {
+  def routes(implicit errorHandler: PartialFunction[Throwable, P[Response[P]]]) = HttpRoutes.of[P] {
     case GET -> Root / PRODUCTS => productService.getAll
       .map(_.asJson)
       .flatMap(Ok(_))
@@ -39,5 +40,11 @@ final case class ProductRoute[P[_]: Effect: Monad](productService: ProductServic
       .map(_.asJson)
       .flatMap(Ok(_))
       .handleErrorWith { errorHandler }
-  }
+  }.orNotFound
+}
+
+object ProductRoute {
+
+  def make[P[_]: Effect](service: ProductService[P])(): P[ProductRoute[P]] =
+    Effect[P].delay(ProductRoute[P](service))
 }

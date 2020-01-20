@@ -1,10 +1,10 @@
 package com.leysoft.products.adapter.out.doobie
 
-import cats.effect.Effect
+import cats.effect.{Async, Effect}
 import com.leysoft.products.adapter.out.doobie.util.DoobieUtil
 import com.leysoft.products.domain.{Product, ProductRepository}
 
-final case class DoobieProductRepository[P[_]: Effect]()(implicit doobieUtil: DoobieUtil[P]) extends ProductRepository[P] {
+final case class DoobieProductRepository[P[_]: Effect] private (doobieUtil: DoobieUtil[P]) extends ProductRepository[P] {
   import doobie.implicits._
 
   override def findBy(id: Long): P[Option[Product]] = doobieUtil
@@ -22,4 +22,10 @@ final case class DoobieProductRepository[P[_]: Effect]()(implicit doobieUtil: Do
 
   override def delete(id: Long): P[Int] = doobieUtil
     .write(sql"DELETE FROM products WHERE id = $id".update)
+}
+
+object DoobieProductRepository {
+
+  def make[P[_]: Effect](dbUtil: DoobieUtil[P]): P[DoobieProductRepository[P]] =
+    Effect[P].delay(DoobieProductRepository[P](dbUtil))
 }

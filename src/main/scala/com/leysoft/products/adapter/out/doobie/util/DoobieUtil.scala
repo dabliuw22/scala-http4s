@@ -1,12 +1,12 @@
 package com.leysoft.products.adapter.out.doobie.util
 
-import cats.effect.{Async, ContextShift}
-import com.leysoft.products.adapter.out.doobie.config.DoobieConfiguration
-import com.typesafe.scalalogging.Logger
+import cats.effect.{Async, ContextShift, Resource}
+import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.query.Query0
 import doobie.util.update.Update0
-import org.slf4j.LoggerFactory
+import io.chrisdavenport.log4cats.Logger
+import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
 trait DoobieUtil[P[_]] {
 
@@ -17,24 +17,26 @@ trait DoobieUtil[P[_]] {
   def write(sqlStatement: Update0): P[Int]
 }
 
-final case class HikariDoobieUtil[P[_]: Async: ContextShift]()(implicit db: DoobieConfiguration[P]) extends DoobieUtil[P] {
+final case class HikariDoobieUtil[P[_]: Async: ContextShift] private (transactor: HikariTransactor[P]) extends DoobieUtil[P] {
+  import cats.syntax.apply._
 
-  private val resource = db.hikariTransactor
-
-  private val looger = Logger(LoggerFactory.getLogger(HikariDoobieUtil.getClass))
+  private val logger = Slf4jLogger.getLoggerFromClass[P](HikariDoobieUtil.getClass)
 
   def read[T](sqlStatement: Query0[T]): P[Option[T]] = {
-    looger.info(s"READ: ${sqlStatement.sql}")
-    resource.use { hikari => sqlStatement.option.transact(hikari) }
+    logger.info(s"READ: ${sqlStatement.sql}") *> sqlStatement.option.transact(transactor)
   }
 
   def readList[T](sqlStatement: Query0[T]): P[List[T]] = {
-    looger.info(s"READ_LIST: ${sqlStatement.sql}")
-    resource.use { hikari => sqlStatement.stream.compile.toList.transact(hikari) }
+    logger.info(s"READ_LIST: ${sqlStatement.sql}") *> sqlStatement.stream.compile.toList.transact(transactor)
   }
 
   def write(sqlStatement: Update0): P[Int] = {
-    looger.info(s"WRITE: ${sqlStatement.sql}")
-    resource.use { hikari => sqlStatement.run.transact(hikari) }
+    logger.info(s"WRITE: ${sqlStatement.sql}") *> sqlStatement.run.transact(transactor)
   }
+}
+
+object HikariDoobieUtil {
+
+  def make[P[_]: Async: ContextShift](transactor: HikariTransactor[P]): P[HikariDoobieUtil[P]] =
+    Async[P].delay(HikariDoobieUtil[P](transactor))
 }
