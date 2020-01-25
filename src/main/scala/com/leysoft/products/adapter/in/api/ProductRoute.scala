@@ -1,13 +1,12 @@
 package com.leysoft.products.adapter.in.api
 
-import cats.Monad
 import cats.effect.{Async, Effect}
 import com.leysoft.products.domain.Product
 import com.leysoft.products.application.ProductService
 import org.http4s.dsl.Http4sDsl
 import org.http4s.{HttpRoutes, Response}
 
-final case class ProductRoute[P[_]: Effect] private (productService: ProductService[P]) extends Http4sDsl[P] {
+final class ProductRoute[P[_]: Effect] private (productService: ProductService[P]) extends Http4sDsl[P] {
   import org.http4s.circe.CirceEntityEncoder._ // for EntityEncoder
   import org.http4s.circe.CirceEntityDecoder._ // for EntityDecoder
   import io.circe.generic.auto._ // for Encoder
@@ -44,6 +43,8 @@ final case class ProductRoute[P[_]: Effect] private (productService: ProductServ
 }
 
 object ProductRoute {
+
+  private def apply[P[_]: Effect](productService: ProductService[P]): ProductRoute[P] = new ProductRoute(productService)
 
   def make[P[_]: Effect](service: ProductService[P])(): P[ProductRoute[P]] =
     Effect[P].delay(ProductRoute[P](service))

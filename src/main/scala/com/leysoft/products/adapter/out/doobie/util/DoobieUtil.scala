@@ -1,11 +1,10 @@
 package com.leysoft.products.adapter.out.doobie.util
 
-import cats.effect.{Async, ContextShift, Resource}
+import cats.effect.{Async, ContextShift}
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.query.Query0
 import doobie.util.update.Update0
-import io.chrisdavenport.log4cats.Logger
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
 trait DoobieUtil[P[_]] {
@@ -36,6 +35,8 @@ final case class HikariDoobieUtil[P[_]: Async: ContextShift] private (transactor
 }
 
 object HikariDoobieUtil {
+
+  private def apply[P[_]: Async: ContextShift](transactor: HikariTransactor[P]): HikariDoobieUtil[P] = new HikariDoobieUtil(transactor)
 
   def make[P[_]: Async: ContextShift](transactor: HikariTransactor[P]): P[HikariDoobieUtil[P]] =
     Async[P].delay(HikariDoobieUtil[P](transactor))

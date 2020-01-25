@@ -4,7 +4,7 @@ import cats.effect.{Async, Effect}
 import com.leysoft.products.adapter.out.doobie.util.DoobieUtil
 import com.leysoft.products.domain.{Product, ProductRepository}
 
-final case class DoobieProductRepository[P[_]: Effect] private (doobieUtil: DoobieUtil[P]) extends ProductRepository[P] {
+final class DoobieProductRepository[P[_]: Effect] private (doobieUtil: DoobieUtil[P]) extends ProductRepository[P] {
   import doobie.implicits._
 
   override def findBy(id: Long): P[Option[Product]] = doobieUtil
@@ -25,6 +25,8 @@ final case class DoobieProductRepository[P[_]: Effect] private (doobieUtil: Doob
 }
 
 object DoobieProductRepository {
+
+  private def apply[P[_]: Effect](doobieUtil: DoobieUtil[P]): DoobieProductRepository[P] = new DoobieProductRepository(doobieUtil)
 
   def make[P[_]: Effect](dbUtil: DoobieUtil[P]): P[DoobieProductRepository[P]] =
     Effect[P].delay(DoobieProductRepository[P](dbUtil))
