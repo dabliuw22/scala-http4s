@@ -46,8 +46,6 @@ final class ProductRoute[P[_]: Effect] private (productService: ProductService[P
 
 object ProductRoute {
 
-  private def apply[P[_]: Effect](productService: ProductService[P]): ProductRoute[P] = new ProductRoute(productService)
-
   def make[P[_]: Effect](service: ProductService[P])(): P[ProductRoute[P]] =
-    Effect[P].delay(ProductRoute[P](service))
+    Effect[P].delay(new ProductRoute[P](service))
 }

@@ -36,8 +36,6 @@ final class HikariDoobieUtil[P[_]: Async: ContextShift] private (transactor: Hik
 
 object HikariDoobieUtil {
 
-  private def apply[P[_]: Async: ContextShift](transactor: HikariTransactor[P]): HikariDoobieUtil[P] = new HikariDoobieUtil(transactor)
-
   def make[P[_]: Async: ContextShift](transactor: HikariTransactor[P]): P[HikariDoobieUtil[P]] =
-    Async[P].delay(HikariDoobieUtil[P](transactor))
+    Async[P].delay(new HikariDoobieUtil[P](transactor))
 }

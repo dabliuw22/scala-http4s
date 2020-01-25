@@ -6,8 +6,8 @@ import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.Response
 import org.http4s.dsl.Http4sDsl
 
-case class ErrorHandler[P[_]: Async] private() {
-  val dsl: Http4sDsl[P] = Http4sDsl[P]
+class ErrorHandler[P[_]: Async] private() {
+  private val dsl: Http4sDsl[P] = Http4sDsl[P]
   import dsl._
   import cats.syntax.apply._
 
@@ -25,5 +25,5 @@ case class ErrorHandler[P[_]: Async] private() {
 object ErrorHandler {
 
   def make[P[_]: Async]: P[ErrorHandler[P]] =
-    Async[P].delay(ErrorHandler[P])
+    Async[P].delay(new ErrorHandler[P])
 }

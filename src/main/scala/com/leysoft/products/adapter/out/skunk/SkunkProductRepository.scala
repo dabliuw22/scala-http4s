@@ -39,10 +39,8 @@ object SkunkProductRepository {
   import skunk.implicits._
   import skunk.codec.all._
 
-  private def apply[P[_]: Effect](session: Session[P]): SkunkProductRepository[P] = new SkunkProductRepository(session)
-
   def make[P[_]: Effect](session: Session[P]): P[SkunkProductRepository[P]] =
-    Effect[P].delay(SkunkProductRepository(session))
+    Effect[P].delay(new SkunkProductRepository(session))
 
   def all: Query[Void, domain.Product] = sql"SELECT * FROM products"
     .query(varchar ~ varchar ~ float8)

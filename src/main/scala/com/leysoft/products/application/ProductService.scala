@@ -48,8 +48,6 @@ final class DefaultProductService[P[_]: Effect: Monad] private (productRepositor
 
 object DefaultProductService {
 
-  private def apply[P[_]: Effect](productRepository: ProductRepository[P]): DefaultProductService[P] = new DefaultProductService(productRepository)
-
   def make[P[_]: Effect](repository: ProductRepository[P]): P[DefaultProductService[P]] =
-    Effect[P].delay(DefaultProductService[P](repository))
+    Effect[P].delay(new DefaultProductService[P](repository))
 }

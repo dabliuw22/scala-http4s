@@ -27,7 +27,7 @@ case class SkunkConfiguration[P[_]: ConcurrentEffect: ContextShift: Trace]() {
     max = threadSize
   )
 
-  lazy val singleSession: Resource[P, Session[P]] = Session.single[P](
+  lazy val single: Resource[P, Session[P]] = Session.single[P](
     host = host,
     port = port,
     user = user,

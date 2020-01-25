@@ -26,8 +26,6 @@ final class DoobieProductRepository[P[_]: Effect] private (doobieUtil: DoobieUti
 
 object DoobieProductRepository {
 
-  private def apply[P[_]: Effect](doobieUtil: DoobieUtil[P]): DoobieProductRepository[P] = new DoobieProductRepository(doobieUtil)
-
   def make[P[_]: Effect](dbUtil: DoobieUtil[P]): P[DoobieProductRepository[P]] =
-    Effect[P].delay(DoobieProductRepository[P](dbUtil))
+    Effect[P].delay(new DoobieProductRepository[P](dbUtil))
 }
