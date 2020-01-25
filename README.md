@@ -1,6 +1,6 @@
 # Http4s API
 
-In this project an API rest with `http4s`, `cats`, `doobie` was created. 
+In this project an API rest with `http4s`, `cats`, `doobie`, `skunk` was created. 
 Using **Type-Classes**.
 
 Requirements:
@@ -12,15 +12,34 @@ Requirements:
 1. Run App.
 
 2. Test with cURL:
-    * Hello Service:
-        ```
-        curl --location --request GET 'http://localhost:8080/hello/your_name'
-        ```
     * All Products:
         ```
         curl --location --request GET 'http://localhost:8080/products'
         ```
     * Get Product By ID:
         ```
-        curl --location --request GET 'http://localhost:8080/products/1'
+        curl --location --request GET 'http://localhost:8080/products/{UUID}'
+        ```
+    * Create Product:
+        ```
+        curl --location --request POST 'http://localhost:8080/products' \
+        --header 'Content-Type: application/json' \
+        --data-raw '{
+            "name": "Your Product Name",
+            "stock": 30.0
+        }'
+        ```
+      * Update Product:
+        ```
+        curl --location --request PUT 'http://localhost:8080/products/{UUID}' \
+        --header 'Content-Type: application/json' \
+        --data-raw '{
+            "name": "Your New Product Name",
+            "stock": 32.0
+        }'
+        ```
+      * Delete Product:
+        ```
+        curl --location --request DELETE 'http://localhost:8080/products/{UUID}' \
+        --header 'Content-Type: application/json'
         ```

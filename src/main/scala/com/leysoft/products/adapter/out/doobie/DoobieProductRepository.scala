@@ -7,7 +7,7 @@ import com.leysoft.products.domain.{Product, ProductRepository}
 final class DoobieProductRepository[P[_]: Effect] private (doobieUtil: DoobieUtil[P]) extends ProductRepository[P] {
   import doobie.implicits._
 
-  override def findBy(id: Int): P[Option[Product]] = doobieUtil
+  override def findBy(id: String): P[Option[Product]] = doobieUtil
     .read(sql"SELECT * FROM products WHERE id = $id".query[Product])
 
   override def findAll: P[List[Product]] = doobieUtil
@@ -20,7 +20,7 @@ final class DoobieProductRepository[P[_]: Effect] private (doobieUtil: DoobieUti
     .write(sql"""UPDATE products SET name = ${product.name}, stock = ${product.stock}
                  WHERE id = ${product.id}""".update)
 
-  override def delete(id: Int): P[Int] = doobieUtil
+  override def delete(id: String): P[Int] = doobieUtil
     .write(sql"DELETE FROM products WHERE id = $id".update)
 }
 

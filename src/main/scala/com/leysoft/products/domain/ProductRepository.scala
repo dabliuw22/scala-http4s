@@ -2,7 +2,7 @@ package com.leysoft.products.domain
 
 trait ProductRepository[P[_]] {
 
-  def findBy(id: Int): P[Option[Product]]
+  def findBy(id: String): P[Option[Product]]
 
   def findAll: P[List[Product]]
 
@@ -10,5 +10,5 @@ trait ProductRepository[P[_]] {
 
   def update(product: Product): P[Int]
 
-  def delete(id: Int): P[Int]
+  def delete(id: String): P[Int]
 }

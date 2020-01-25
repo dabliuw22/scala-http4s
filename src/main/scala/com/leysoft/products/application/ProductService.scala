@@ -7,7 +7,7 @@ import com.leysoft.products.domain.{Product, ProductRepository}
 
 trait ProductService[P[_]] {
 
-  def get(id: Int): P[Product]
+  def get(id: String): P[Product]
 
   def getAll: P[List[Product]]
 
@@ -15,14 +15,14 @@ trait ProductService[P[_]] {
 
   def update(product: Product): P[Product]
 
-  def remove(id: Int): P[Boolean]
+  def remove(id: String): P[Boolean]
 }
 
 final class DefaultProductService[P[_]: Effect: Monad] private (productRepository: ProductRepository[P]) extends ProductService[P] {
   import cats.syntax.applicativeError._
   import cats.syntax.functor._
 
-  override def get(id: Int): P[Product] = productRepository.findBy(id).map {
+  override def get(id: String): P[Product] = productRepository.findBy(id).map {
     case Some(value) => value
     case _ => throw ProductNotFoundException(s"Not Found Product By Id: $id")
   }.handleError(e => throw ProductNotFoundException(e.getMessage))
@@ -40,7 +40,7 @@ final class DefaultProductService[P[_]: Effect: Monad] private (productRepositor
     case _ => product
   }.handleError(e => throw ProductWritingException(e.getMessage))
 
-  override def remove(id: Int): P[Boolean] = productRepository.delete(id).map {
+  override def remove(id: String): P[Boolean] = productRepository.delete(id).map {
     case 0 => false
     case _ => true
   }.handleError(e => throw ProductWritingException(e.getMessage))

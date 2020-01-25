@@ -1,3 +1,10 @@
 package com.leysoft.products.domain
 
-case class Product(id: Int, name: String, stock: Double)
+import java.util.UUID
+
+case class Product(id: String = UUID.randomUUID().toString, name: String, stock: Double)
+
+object Product {
+
+  def apply(name: String, stock: Double): Product = new Product(name = name, stock = stock)
+}

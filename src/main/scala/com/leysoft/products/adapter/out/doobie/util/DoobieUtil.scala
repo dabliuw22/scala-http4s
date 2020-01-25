@@ -16,7 +16,7 @@ trait DoobieUtil[P[_]] {
   def write(sqlStatement: Update0): P[Int]
 }
 
-final case class HikariDoobieUtil[P[_]: Async: ContextShift] private (transactor: HikariTransactor[P]) extends DoobieUtil[P] {
+final class HikariDoobieUtil[P[_]: Async: ContextShift] private (transactor: HikariTransactor[P]) extends DoobieUtil[P] {
   import cats.syntax.apply._
 
   private val logger = Slf4jLogger.getLoggerFromClass[P](HikariDoobieUtil.getClass)

@@ -10,7 +10,7 @@ final class SkunkProductRepository[P[_]: Effect] private(session: Session[P]) ex
   import SkunkProductRepository._
   import cats.syntax.functor._
 
-  override def findBy(id: Int): P[Option[domain.Product]] = session.prepare(byId)
+  override def findBy(id: String): P[Option[domain.Product]] = session.prepare(byId)
     .use(prepared => prepared.option(id))
 
   override def findAll: P[List[domain.Product]] = session.execute(all)
@@ -28,7 +28,7 @@ final class SkunkProductRepository[P[_]: Effect] private(session: Session[P]) ex
       }
     }
 
-  override def delete(id: Int): P[Int] = session.prepare(del)
+  override def delete(id: String): P[Int] = session.prepare(del)
     .use { prepared => prepared.execute(id)
       .map { case Completion.Delete(count) => count }
     }
@@ -45,19 +45,19 @@ object SkunkProductRepository {
     Effect[P].delay(SkunkProductRepository(session))
 
   def all: Query[Void, domain.Product] = sql"SELECT * FROM products"
-    .query(int4 ~ varchar ~ float8)
+    .query(varchar ~ varchar ~ float8)
     .map { case id ~ name ~ stock => domain.Product(id, name, stock) }
 
-  def byId: Query[Int, domain.Product] = sql"SELECT * FROM products WHERE id = $int4"
-    .query(int4 ~ varchar ~ float8)
+  def byId: Query[String, domain.Product] = sql"SELECT * FROM products WHERE id = $varchar"
+    .query(varchar ~ varchar ~ float8)
     .map { case id ~ name ~ stock => domain.Product(id, name, stock) }
 
-  def ins: Command[Int ~ String ~ Double] =
-    sql"INSERT INTO products VALUES($int4, $varchar, $float8)".command
+  def ins: Command[String ~ String ~ Double] =
+    sql"INSERT INTO products VALUES($varchar, $varchar, $float8)".command
 
-  def upd: Command[String ~ Double ~ Int] =
+  def upd: Command[String ~ Double ~ String] =
     sql"""UPDATE products SET name = $varchar, stock = $float8
-         WHERE id = $int4""".command
+         WHERE id = $varchar""".command
 
-  def del: Command[Int] = sql"DELETE FROM products WHERE id = $int4".command
+  def del: Command[String] = sql"DELETE FROM products WHERE id = $varchar".command
 }

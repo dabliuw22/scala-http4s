@@ -9,7 +9,8 @@ import org.http4s.{HttpRoutes, Response}
 final class ProductRoute[P[_]: Effect] private (productService: ProductService[P]) extends Http4sDsl[P] {
   import org.http4s.circe.CirceEntityEncoder._ // for EntityEncoder
   import org.http4s.circe.CirceEntityDecoder._ // for EntityDecoder
-  import io.circe.generic.auto._ // for Encoder
+  // import io.circe.generic.auto._ // for Encoder
+  import Codecs._
   import io.circe.syntax._ // for asJson
   import cats.syntax.applicativeError._ // for recoverWith and handleErrorWith
   import cats.syntax.functor._ // for map
@@ -22,23 +23,24 @@ final class ProductRoute[P[_]: Effect] private (productService: ProductService[P
     case GET -> Root / PRODUCTS => productService.getAll
       .map(_.asJson)
       .flatMap(Ok(_))
-      .recoverWith { errorHandler }
-    case GET -> Root / PRODUCTS / IntVar(productId) => productService.get(productId)
+      .recoverWith(errorHandler)
+    case GET -> Root / PRODUCTS / UUIDVar(productId) => productService.get(productId.toString)
       .map(_.asJson)
       .flatMap(Ok(_))
-      .handleErrorWith { errorHandler }
+      .handleErrorWith(errorHandler)
     case request @ POST -> Root / PRODUCTS => request.as[Product]
-      .flatMap { productService.create }
-      .flatMap { Created(_) }
-      .handleErrorWith { errorHandler }
-    case request @ PUT -> Root / PRODUCTS => request.as[Product]
-      .flatMap { productService.update }
-      .flatMap { Ok(_) }
-      .handleErrorWith { errorHandler }
-    case DELETE -> Root / PRODUCTS / IntVar(productId) => productService.remove(productId)
+      .flatMap(productService.create)
+      .flatMap(Created(_))
+      .handleErrorWith(errorHandler)
+    case request @ PUT -> Root / PRODUCTS / UUIDVar(productId) => request.as[Product]
+      .map(product => product.copy(id = productId.toString))
+      .flatMap(productService.update)
+      .flatMap(Ok(_))
+      .handleErrorWith(errorHandler)
+    case DELETE -> Root / PRODUCTS / UUIDVar(productId) => productService.remove(productId.toString)
       .map(_.asJson)
       .flatMap(Ok(_))
-      .handleErrorWith { errorHandler }
+      .handleErrorWith(errorHandler)
   }.orNotFound
 }
 
