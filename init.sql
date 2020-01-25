@@ -1,7 +1,7 @@
 CREATE TABLE products (
     id INTEGER PRIMARY KEY,
     name VARCHAR NOT NULL,
-    stock NUMERIC NOT NULL
+    stock FLOAT8 NOT NULL
 );
 
 INSERT INTO products(id, name, stock) VALUES(1, 'p1', 2.0);

@@ -23,7 +23,7 @@ final class ProductRoute[P[_]: Effect] private (productService: ProductService[P
       .map(_.asJson)
       .flatMap(Ok(_))
       .recoverWith { errorHandler }
-    case GET -> Root / PRODUCTS / LongVar(productId) => productService.get(productId)
+    case GET -> Root / PRODUCTS / IntVar(productId) => productService.get(productId)
       .map(_.asJson)
       .flatMap(Ok(_))
       .handleErrorWith { errorHandler }
@@ -35,7 +35,7 @@ final class ProductRoute[P[_]: Effect] private (productService: ProductService[P
       .flatMap { productService.update }
       .flatMap { Ok(_) }
       .handleErrorWith { errorHandler }
-    case DELETE -> Root / PRODUCTS / LongVar(productId) => productService.remove(productId)
+    case DELETE -> Root / PRODUCTS / IntVar(productId) => productService.remove(productId)
       .map(_.asJson)
       .flatMap(Ok(_))
       .handleErrorWith { errorHandler }

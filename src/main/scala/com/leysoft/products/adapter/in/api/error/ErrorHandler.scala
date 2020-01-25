@@ -18,7 +18,7 @@ case class ErrorHandler[P[_]: Async] private() {
       logger.error(s"Error: ${error.getMessage}") *> NotFound(s"Oops....")
     case error: ProductWritingException =>
       logger.error(s"Error: ${error.getMessage}") *> Conflict(s"Oops....")
-    case _ => InternalServerError(s"Oops....")
+    case error => logger.error(s"Error: ${error.getMessage}") *> InternalServerError(s"Oops....")
   }
 }
 

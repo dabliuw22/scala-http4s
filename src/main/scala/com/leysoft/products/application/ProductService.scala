@@ -7,7 +7,7 @@ import com.leysoft.products.domain.{Product, ProductRepository}
 
 trait ProductService[P[_]] {
 
-  def get(id: Long): P[Product]
+  def get(id: Int): P[Product]
 
   def getAll: P[List[Product]]
 
@@ -15,20 +15,20 @@ trait ProductService[P[_]] {
 
   def update(product: Product): P[Product]
 
-  def remove(id: Long): P[Boolean]
+  def remove(id: Int): P[Boolean]
 }
 
 final class DefaultProductService[P[_]: Effect: Monad] private (productRepository: ProductRepository[P]) extends ProductService[P] {
   import cats.syntax.applicativeError._
   import cats.syntax.functor._
 
-  override def get(id: Long): P[Product] = productRepository.findBy(id).map {
+  override def get(id: Int): P[Product] = productRepository.findBy(id).map {
     case Some(value) => value
     case _ => throw ProductNotFoundException(s"Not Found Product By Id: $id")
   }.handleError(e => throw ProductNotFoundException(e.getMessage))
 
   override def getAll: P[List[Product]] = productRepository.findAll
-    .handleError(_ => List.empty)
+    .handleError(e => throw ProductNotFoundException(e.getMessage))
 
   override def create(product: Product): P[Product] = productRepository.save(product).map {
     case 0 => throw ProductWritingException(s"It Was Not Possible To Create The Product With id: ${product.id}")
@@ -40,7 +40,7 @@ final class DefaultProductService[P[_]: Effect: Monad] private (productRepositor
     case _ => product
   }.handleError(e => throw ProductWritingException(e.getMessage))
 
-  override def remove(id: Long): P[Boolean] = productRepository.delete(id).map {
+  override def remove(id: Int): P[Boolean] = productRepository.delete(id).map {
     case 0 => false
     case _ => true
   }.handleError(e => throw ProductWritingException(e.getMessage))

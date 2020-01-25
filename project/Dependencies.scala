@@ -9,12 +9,13 @@ object Dependencies {
   def cats(artifact: String): ModuleID = "org.typelevel" %% artifact % "2.0.0"
   def monix(artifact: String): ModuleID = "io.monix" %% artifact % "3.1.0"
   def doobie(artifact: String): ModuleID = "org.tpolecat" %% artifact % "0.8.6"
+  def skunk(artifact: String): ModuleID = "org.tpolecat" %% artifact % "0.0.7"
   def http4s(artifact: String): ModuleID = "org.http4s" %% artifact % "0.21.0-SNAPSHOT"
   def circe(artifact: String): ModuleID = "io.circe" %% artifact % "0.12.3"
   def log4cats(artifact: String): ModuleID = "io.chrisdavenport" %% artifact % "1.0.1"
   def scalaLog(artifact: String): ModuleID = "com.typesafe.scala-logging" %% artifact % "3.9.2"
-  def logback(artifact: String): ModuleID = "ch.qos.logback" %% artifact % "1.2.3"
-  def logbackEncoder(artifact: String): ModuleID = "net.logstash.logback" %% artifact % "6.3"
+  def logback(artifact: String): ModuleID = "ch.qos.logback" % artifact % "1.2.3"
+  def logbackEncoder(artifact: String): ModuleID = "net.logstash.logback" % artifact % "6.3"
 
   val dependencies = Seq(
     cats("cats-macros"),
@@ -26,6 +27,7 @@ object Dependencies {
     doobie("doobie-core"),
     doobie("doobie-hikari"),
     doobie("doobie-postgres"),
+    skunk("skunk-core"),
     http4s("http4s-dsl"),
     http4s("http4s-blaze-server"),
     http4s("http4s-circe"),
