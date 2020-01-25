@@ -9,8 +9,8 @@ import org.http4s.{HttpRoutes, Response}
 final class ProductRoute[P[_]: Effect] private (productService: ProductService[P]) extends Http4sDsl[P] {
   import org.http4s.circe.CirceEntityEncoder._ // for EntityEncoder
   import org.http4s.circe.CirceEntityDecoder._ // for EntityDecoder
-  // import io.circe.generic.auto._ // for Encoder
-  import Codecs._
+  // import io.circe.generic.auto._ // for Generic (case class) Encoder
+  import Codecs._ // for Custom Encoder and Custom Decoder
   import io.circe.syntax._ // for asJson
   import cats.syntax.applicativeError._ // for recoverWith and handleErrorWith
   import cats.syntax.functor._ // for map
