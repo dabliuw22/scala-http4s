@@ -18,7 +18,7 @@ trait ProductService[P[_]] {
   def remove(id: String): P[Boolean]
 }
 
-final class DefaultProductService[P[_]: Effect: Monad] private (productRepository: ProductRepository[P]) extends ProductService[P] {
+final class DefaultProductService[P[_]: Effect: Monad](productRepository: ProductRepository[P]) extends ProductService[P] {
   import cats.syntax.applicativeError._
   import cats.syntax.functor._
 
