@@ -10,7 +10,7 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 import scala.concurrent.ExecutionContext
 
-protected[products] trait PropertieSpec extends AsyncFunSuite with ScalaCheckDrivenPropertyChecks {
+protected[products] abstract class PropertySpec extends AsyncFunSuite with ScalaCheckDrivenPropertyChecks {
 
   implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 

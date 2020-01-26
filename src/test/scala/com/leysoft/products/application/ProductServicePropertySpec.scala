@@ -1,10 +1,10 @@
 package com.leysoft.products.application
 
 import cats.effect.IO
-import com.leysoft.products.{PropertieSpec, domain}
-import com.leysoft.products.domain.{ProductRepository}
+import com.leysoft.products.{domain, PropertySpec}
+import com.leysoft.products.domain.ProductRepository
 
-final class ProductServiceSpec extends PropertieSpec {
+final class ProductServicePropertySpec extends PropertySpec {
   import domain.arbitraries._
 
   def productRepository(product: domain.Product): TestProductRepository =
@@ -13,7 +13,7 @@ final class ProductServiceSpec extends PropertieSpec {
     }
 
   forAll { product: domain.Product =>
-    spec("Succeful getById") {
+    spec("GetById") {
       new DefaultProductService[IO](productRepository(product))
         .get(product.id)
         .map(p => assert(p.eq(product)))
