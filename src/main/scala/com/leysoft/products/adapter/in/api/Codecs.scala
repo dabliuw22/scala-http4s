@@ -1,7 +1,11 @@
 package com.leysoft.products.adapter.in.api
 
+import com.leysoft.products.adapter.in.api.ProductRoute.StreamArray
 import io.circe.{Decoder, Encoder, Json}
 import com.leysoft.products.domain
+import fs2.Stream
+import org.http4s.headers.`Content-Type`
+import org.http4s.{Entity, EntityEncoder, Headers, MediaType}
 
 object Codecs {
 
@@ -29,4 +33,17 @@ object Codecs {
         (STOCK, Json.fromDoubleOrString(p.stock))
       )
     }
+
+  implicit def streamEntityEncoder[P[_], E: Encoder]: EntityEncoder[P, StreamArray[P, E]] = new EntityEncoder[P, StreamArray[P, E]] {
+
+    override def toEntity(a: StreamArray[P, E]): Entity[P] = {
+      val stream: Stream[P, String] = Stream.emit("[") ++ a.stream
+        .map(Encoder[E].apply)
+        .map(_.noSpaces)
+        .intersperse(",") ++ Stream.emit("]")
+      Entity(stream.through(fs2.text.utf8Encode[P]))
+    }
+
+    override def headers: Headers = Headers.of(`Content-Type`(MediaType.application.json))
+  }
 }
