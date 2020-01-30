@@ -1,6 +1,5 @@
 package com.leysoft.products.adapter.in.api
 
-import com.leysoft.products.adapter.in.api.ProductRoute.StreamArray
 import io.circe.{Decoder, Encoder, Json}
 import com.leysoft.products.domain
 import fs2.Stream
