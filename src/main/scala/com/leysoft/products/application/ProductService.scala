@@ -4,12 +4,15 @@ import cats.Monad
 import cats.effect.Effect
 import com.leysoft.products.domain.error.{ProductNotFoundException, ProductWritingException}
 import com.leysoft.products.domain.{Product, ProductRepository}
+import fs2.Stream
 
 trait ProductService[P[_]] {
 
   def get(id: String): P[Product]
 
   def getAll: P[List[Product]]
+
+  def getAllStreams: Stream[P, Product]
 
   def create(product: Product): P[Product]
 
@@ -28,6 +31,9 @@ final class DefaultProductService[P[_]: Effect: Monad](productRepository: Produc
   }.handleError(e => throw ProductNotFoundException(e.getMessage))
 
   override def getAll: P[List[Product]] = productRepository.findAll
+    .handleError(e => throw ProductNotFoundException(e.getMessage))
+
+  override def getAllStreams: Stream[P, Product] = productRepository.findAllAStreams
     .handleError(e => throw ProductNotFoundException(e.getMessage))
 
   override def create(product: Product): P[Product] = productRepository.save(product).map {

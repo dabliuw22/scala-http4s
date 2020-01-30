@@ -27,6 +27,8 @@ protected class TestProductRepository extends ProductRepository[IO] {
 
   override def findAll: IO[List[domain.Product]] = ???
 
+  override def findAllAStreams: fs2.Stream[IO, domain.Product] = ???
+
   override def save(product: domain.Product): IO[Int] = ???
 
   override def update(product: domain.Product): IO[Int] = ???

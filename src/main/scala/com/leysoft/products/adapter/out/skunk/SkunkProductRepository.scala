@@ -3,17 +3,24 @@ package com.leysoft.products.adapter.out.skunk
 import cats.effect.Effect
 import com.leysoft.products.domain
 import com.leysoft.products.domain.ProductRepository
+import fs2.Stream
 import skunk.Session
 import skunk.data.Completion
 
 final class SkunkProductRepository[P[_]: Effect] private(session: Session[P]) extends ProductRepository[P]  {
   import SkunkProductRepository._
   import cats.syntax.functor._
+  import skunk.Void
 
   override def findBy(id: String): P[Option[domain.Product]] = session.prepare(byId)
     .use(prepared => prepared.option(id))
 
   override def findAll: P[List[domain.Product]] = session.execute(all)
+
+  override def findAllAStreams: Stream[P, domain.Product] = for {
+    prepared <- Stream.resource(session.prepare(all))
+    stream <-  prepared.stream(Void, 64)
+  } yield stream
 
   override def save(product: domain.Product): P[Int] = session.prepare(ins)
     .use { prepared => prepared.execute((product.id, product.name), product.stock)

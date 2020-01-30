@@ -12,6 +12,7 @@ object Dependencies {
 
   def cats(artifact: String): ModuleID = "org.typelevel" %% artifact % "2.0.0"
   def monix(artifact: String): ModuleID = "io.monix" %% artifact % "3.1.0"
+  def fs2(artifact: String): ModuleID = "co.fs2" %% artifact % "2.2.1"
   def doobie(artifact: String): ModuleID = "org.tpolecat" %% artifact % "0.8.6"
   def skunk(artifact: String): ModuleID = "org.tpolecat" %% artifact % "0.0.7"
   def http4s(artifact: String): ModuleID = "org.http4s" %% artifact % "0.21.0-SNAPSHOT"
@@ -28,6 +29,7 @@ object Dependencies {
     cats("cats-effect"),
     monix("monix-eval"),
     monix("monix-execution"),
+    fs2("fs2-core"),
     doobie("doobie-core"),
     doobie("doobie-hikari"),
     doobie("doobie-postgres"),

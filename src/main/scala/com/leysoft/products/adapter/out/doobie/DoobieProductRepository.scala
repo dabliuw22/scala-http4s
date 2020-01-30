@@ -13,6 +13,9 @@ final class DoobieProductRepository[P[_]: Effect] private (doobieUtil: DoobieUti
   override def findAll: P[List[Product]] = doobieUtil
     .readList(sql"SELECT * FROM products".query[Product])
 
+  override def findAllAStreams: fs2.Stream[P, Product] = doobieUtil
+    .readStreams(sql"SELECT * FROM products".query[Product])
+
   override def save(product: Product): P[Int] = doobieUtil
     .write(sql"INSERT INTO products VALUES(${product.id}, ${product.name}, ${product.stock})".update)
 
