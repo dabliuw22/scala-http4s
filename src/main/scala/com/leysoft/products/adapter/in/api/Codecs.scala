@@ -33,10 +33,10 @@ object Codecs {
       )
     }
 
-  implicit def streamEntityEncoder[P[_], E: Encoder]: EntityEncoder[P, StreamArray[P, E]] = new EntityEncoder[P, StreamArray[P, E]] {
+  implicit def streamEntityEncoder[P[_], E: Encoder]: EntityEncoder[P, Stream[P, E]] = new EntityEncoder[P, Stream[P, E]] {
 
-    override def toEntity(a: StreamArray[P, E]): Entity[P] = {
-      val stream: Stream[P, String] = Stream.emit("[") ++ a.stream
+    override def toEntity(a: Stream[P, E]): Entity[P] = {
+      val stream: Stream[P, String] = Stream.emit("[") ++ a
         .map(Encoder[E].apply)
         .map(_.noSpaces)
         .intersperse(",") ++ Stream.emit("]")
