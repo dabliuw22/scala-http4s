@@ -12,6 +12,7 @@ import monix.execution.Scheduler
 import org.http4s.server.blaze.BlazeServerBuilder
 
 object ApiMonix extends TaskApp {
+  import org.http4s.implicits._ // for orNotFound
   implicit val contextShift: ContextShift[Task] = Task.contextShift(scheduler)
   implicit val timer: Timer[Task] = Task.timer(Scheduler.io())
 
@@ -25,7 +26,7 @@ object ApiMonix extends TaskApp {
         error <- ErrorHandler.make[Task]
         _ <- BlazeServerBuilder[Task]
           .bindHttp(port = 8080, host = "localhost")
-          .withHttpApp(api.routes(error.handler))
+          .withHttpApp(api.routes(error.handler).orNotFound)
           .serve
           .compile
           .drain

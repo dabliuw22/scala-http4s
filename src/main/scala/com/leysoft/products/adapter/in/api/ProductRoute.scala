@@ -4,6 +4,7 @@ import cats.effect.{Async, Effect}
 import com.leysoft.products.domain.Product
 import com.leysoft.products.application.ProductService
 import org.http4s.dsl.Http4sDsl
+import org.http4s.server.Router
 import org.http4s.{HttpRoutes, Response}
 
 final class ProductRoute[P[_]: Effect] private (productService: ProductService[P]) extends Http4sDsl[P] {
@@ -15,35 +16,37 @@ final class ProductRoute[P[_]: Effect] private (productService: ProductService[P
   import cats.syntax.applicativeError._ // for recoverWith and handleErrorWith
   import cats.syntax.functor._ // for map
   import cats.syntax.flatMap._ // for flatMap
-  import org.http4s.implicits._ // for orNotFound
 
-  private val PRODUCTS = "products"
+  private val PREFIX = "/products"
 
-  def routes(implicit errorHandler: PartialFunction[Throwable, P[Response[P]]]) = HttpRoutes.of[P] {
-    case GET -> Root / PRODUCTS => productService.getAll
+  private def httpRoutes(errorHandler: PartialFunction[Throwable, P[Response[P]]]) = HttpRoutes.of[P] {
+    case GET -> Root => productService.getAll
       .map(_.asJson)
       .flatMap(Ok(_))
       .recoverWith(errorHandler)
-    case GET -> Root / PRODUCTS / "streams" => Ok(productService.getAllStreams)
+    case GET -> Root / "streams" => Ok(productService.getAllStreams)
       .recoverWith(errorHandler)
-    case GET -> Root / PRODUCTS / UUIDVar(productId) => productService.get(productId.toString)
+    case GET -> Root / UUIDVar(productId) => productService.get(productId.toString)
       .map(_.asJson)
       .flatMap(Ok(_))
       .handleErrorWith(errorHandler)
-    case request @ POST -> Root / PRODUCTS => request.as[Product]
+    case request @ POST -> Root => request.as[Product]
       .flatMap(productService.create)
       .flatMap(Created(_))
       .handleErrorWith(errorHandler)
-    case request @ PUT -> Root / PRODUCTS / UUIDVar(productId) => request.as[Product]
+    case request @ PUT -> Root / UUIDVar(productId) => request.as[Product]
       .map(product => product.copy(id = productId.toString))
       .flatMap(productService.update)
       .flatMap(Ok(_))
       .handleErrorWith(errorHandler)
-    case DELETE -> Root / PRODUCTS / UUIDVar(productId) => productService.remove(productId.toString)
+    case DELETE -> Root / UUIDVar(productId) => productService.remove(productId.toString)
       .map(_.asJson)
       .flatMap(Ok(_))
       .handleErrorWith(errorHandler)
-  }.orNotFound
+  }
+
+  def routes(errorHandler: PartialFunction[Throwable, P[Response[P]]]): HttpRoutes[P] =
+    Router(PREFIX -> httpRoutes(errorHandler))
 }
 
 object ProductRoute {

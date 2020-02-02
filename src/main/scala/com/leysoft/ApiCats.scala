@@ -10,6 +10,7 @@ import natchez.Trace.Implicits.noop
 import org.http4s.server.blaze.BlazeServerBuilder
 
 object ApiCats extends IOApp {
+  import org.http4s.implicits._ // for orNotFound
   // import cats.implicits._ // for <+> and BlazeServerBuilder.as
   // import org.http4s._ // for Request, Response, HttpRoutes
   // import org.http4s.dsl.io._ // for NotFound, Conflict, InternalServerError, Http4sDsl[IO]
@@ -24,7 +25,7 @@ object ApiCats extends IOApp {
           error <- ErrorHandler.make[IO]
           _ <- BlazeServerBuilder[IO]
             .bindHttp(port = 8080, host = "localhost")
-            .withHttpApp(api.routes(error.handler))
+            .withHttpApp(api.routes(error.handler).orNotFound)
             .serve
             .compile
             .drain
