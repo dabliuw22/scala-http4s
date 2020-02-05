@@ -37,19 +37,22 @@ final class DefaultProductService[P[_]: Effect: Monad](productRepository: Produc
     .handleError(e => throw ProductNotFoundException(e.getMessage))
 
   override def create(product: Product): P[Product] = productRepository.save(product).map {
-    case 0 => throw ProductWritingException(s"It Was Not Possible To Create The Product With id: ${product.id}")
-    case _ => product
+    validate(_, s"It Was Not Possible To Create The Product With id: ${product.id}", product)
   }.handleError(e => throw ProductWritingException(e.getMessage))
 
   override def update(product: Product): P[Product] = productRepository.update(product).map {
-    case 0 => throw ProductWritingException(s"It Was Not Possible To Update The Product With id: ${product.id}")
-    case _ => product
+    validate(_, s"It Was Not Possible To Update The Product With id: ${product.id}", product)
   }.handleError(e => throw ProductWritingException(e.getMessage))
 
   override def remove(id: String): P[Boolean] = productRepository.delete(id).map {
     case 0 => false
     case _ => true
   }.handleError(e => throw ProductWritingException(e.getMessage))
+
+  private def validate[A](count: Int, message: String, a: A): A = count match {
+    case 0 => throw ProductWritingException(message)
+    case _ => a
+  }
 }
 
 object DefaultProductService {
