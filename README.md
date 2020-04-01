@@ -8,10 +8,13 @@ Requirements:
    * Scala 2.13.x
    * Docker
    * Docker Compose
+   
+1. Run Containers:
+    `docker-compose up -d`
 
-1. Run App.
+2. Run App.
 
-2. Test with cURL:
+3. Test with cURL:
     * All Products:
         ```
         curl --location --request GET 'http://localhost:8080/products'
@@ -29,7 +32,7 @@ Requirements:
             "stock": 30.0
         }'
         ```
-      * Update Product:
+    * Update Product:
         ```
         curl --location --request PUT 'http://localhost:8080/products/{UUID}' \
         --header 'Content-Type: application/json' \
@@ -38,7 +41,7 @@ Requirements:
             "stock": 32.0
         }'
         ```
-      * Delete Product:
+    * Delete Product:
         ```
         curl --location --request DELETE 'http://localhost:8080/products/{UUID}' \
         --header 'Content-Type: application/json'

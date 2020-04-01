@@ -33,16 +33,19 @@ object Codecs {
       )
     }
 
-  implicit def streamEntityEncoder[P[_], E: Encoder]: EntityEncoder[P, StreamArray[P, E]] = new EntityEncoder[P, StreamArray[P, E]] {
+  implicit def streamEntityEncoder[P[_], E: Encoder]
+    : EntityEncoder[P, StreamArray[P, E]] =
+    new EntityEncoder[P, StreamArray[P, E]] {
 
-    override def toEntity(a: StreamArray[P, E]): Entity[P] = {
-      val stream: Stream[P, String] = Stream.emit("[") ++ a.stream
-        .map(Encoder[E].apply)
-        .map(_.noSpaces)
-        .intersperse(",") ++ Stream.emit("]")
-      Entity(stream.through(fs2.text.utf8Encode[P]))
+      override def toEntity(a: StreamArray[P, E]): Entity[P] = {
+        val stream: Stream[P, String] = Stream.emit("[") ++ a.stream
+          .map(Encoder[E].apply)
+          .map(_.noSpaces)
+          .intersperse(",") ++ Stream.emit("]")
+        Entity(stream.through(fs2.text.utf8Encode[P]))
+      }
+
+      override def headers: Headers =
+        Headers.of(`Content-Type`(MediaType.application.json))
     }
-
-    override def headers: Headers = Headers.of(`Content-Type`(MediaType.application.json))
-  }
 }

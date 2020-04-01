@@ -15,21 +15,22 @@ object ApiCats extends IOApp {
   // import org.http4s._ // for Request, Response, HttpRoutes
   // import org.http4s.dsl.io._ // for NotFound, Conflict, InternalServerError, Http4sDsl[IO]
 
-  override def run(args: List[String]): IO[ExitCode] = SkunkConfiguration[IO].session
-    .use { resource =>
-      resource.use { session =>
-        for {
-          repository <- SkunkProductRepository.make[IO](session)
-          service <- DefaultProductService.make[IO](repository)
-          api <- ProductRoute.make[IO](service)
-          error <- ErrorHandler.make[IO]
-          _ <- BlazeServerBuilder[IO]
-            .bindHttp(port = 8080, host = "localhost")
-            .withHttpApp(api.routes(error.handler).orNotFound)
-            .serve
-            .compile
-            .drain
-        } yield ExitCode.Success
+  override def run(args: List[String]): IO[ExitCode] =
+    SkunkConfiguration[IO].session
+      .use { resource =>
+        resource.use { session =>
+          for {
+            repository <- SkunkProductRepository.make[IO](session)
+            service <- DefaultProductService.make[IO](repository)
+            api <- ProductRoute.make[IO](service)
+            error <- ErrorHandler.make[IO]
+            _ <- BlazeServerBuilder[IO]
+                  .bindHttp(port = 8080, host = "localhost")
+                  .withHttpApp(api.routes(error.handler).orNotFound)
+                  .serve
+                  .compile
+                  .drain
+          } yield ExitCode.Success
+        }
       }
-    }
 }

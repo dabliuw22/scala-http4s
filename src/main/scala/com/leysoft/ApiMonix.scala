@@ -16,20 +16,21 @@ object ApiMonix extends TaskApp {
   implicit val contextShift: ContextShift[Task] = Task.contextShift(scheduler)
   implicit val timer: Timer[Task] = Task.timer(Scheduler.io())
 
-  override def run(args: List[String]): Task[ExitCode] = DoobieConfiguration[Task].transactor
-    .use { transactor =>
-      for {
-        db <- HikariDoobieUtil.make[Task](transactor)
-        repository <- DoobieProductRepository.make[Task](db)
-        service <- DefaultProductService.make[Task](repository)
-        api <- ProductRoute.make[Task](service)
-        error <- ErrorHandler.make[Task]
-        _ <- BlazeServerBuilder[Task]
-          .bindHttp(port = 8080, host = "localhost")
-          .withHttpApp(api.routes(error.handler).orNotFound)
-          .serve
-          .compile
-          .drain
-      } yield ExitCode.Success
-    }
+  override def run(args: List[String]): Task[ExitCode] =
+    DoobieConfiguration[Task].transactor
+      .use { transactor =>
+        for {
+          db <- HikariDoobieUtil.make[Task](transactor)
+          repository <- DoobieProductRepository.make[Task](db)
+          service <- DefaultProductService.make[Task](repository)
+          api <- ProductRoute.make[Task](service)
+          error <- ErrorHandler.make[Task]
+          _ <- BlazeServerBuilder[Task]
+                .bindHttp(port = 8080, host = "localhost")
+                .withHttpApp(api.routes(error.handler).orNotFound)
+                .serve
+                .compile
+                .drain
+        } yield ExitCode.Success
+      }
 }
