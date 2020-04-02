@@ -27,14 +27,7 @@ final class RedisProductRepository[P[_]: Effect] private (
 
   override def save(product: domain.Product): P[Int] =
     redisUtil
-      .hmSet(
-        product.id,
-        Map(
-          idField -> product.id,
-          nameField -> product.name,
-          stockName -> product.stock.toString
-        )
-      )
+      .hmSet(product.id, fb(product), expiration)
       .map(_ => 1)
       .handleError(_ => 0)
 
@@ -55,10 +48,7 @@ object RedisProductRepository {
 
   private val stockName = "stock"
 
-  def make[P[_]: Effect](
-    commands: RedisUtil[P]
-  ): P[RedisProductRepository[P]] =
-    Effect[P].delay(new RedisProductRepository(commands))
+  private val expiration = 10 minutes
 
   private val fa: Map[String, String] => Option[domain.Product] = hash =>
     hash
@@ -74,4 +64,16 @@ object RedisProductRepository {
                   .map(stock => domain.Product(id, name, stock.toDouble))
           )
     )
+
+  private val fb: domain.Product => Map[String, String] = product =>
+    Map(
+      idField -> product.id,
+      nameField -> product.name,
+      stockName -> product.stock.toString
+  )
+
+  def make[P[_]: Effect](
+    commands: RedisUtil[P]
+  ): P[RedisProductRepository[P]] =
+    Effect[P].delay(new RedisProductRepository(commands))
 }

@@ -3,13 +3,15 @@ package com.leysoft.products.adapter.out.redis.util
 import cats.effect.Effect
 import dev.profunktor.redis4cats.algebra.RedisCommands
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.FiniteDuration
 
 sealed trait RedisUtil[P[_]] {
 
   def hmGet[A](key: String, fa: Map[String, String] => A, fields: String*): P[A]
 
-  def hmSet[A](key: String, fieldValues: Map[String, String]): P[Unit]
+  def hmSet[A](key: String,
+               fieldValues: Map[String, String],
+               expiration: FiniteDuration): P[Unit]
 
   def hDel(key: String, fields: String*): P[Unit]
 }
@@ -20,8 +22,6 @@ final class DefaultRedisUtil[P[_]: Effect] private (
   import cats.syntax.apply._
   import cats.syntax.functor._
 
-  private val duration = 10 minutes
-
   override def hmGet[A](key: String,
                         fa: Map[String, String] => A,
                         fields: String*): P[A] =
@@ -30,10 +30,11 @@ final class DefaultRedisUtil[P[_]: Effect] private (
       .map(fa)
 
   override def hmSet[A](key: String,
-                        fieldValues: Map[String, String]): P[Unit] =
+                        fieldValues: Map[String, String],
+                        expiration: FiniteDuration): P[Unit] =
     commands
       .hmSet(key, fieldValues) *> commands
-      .expire(key, duration)
+      .expire(key, expiration)
 
   override def hDel(key: String, fields: String*): P[Unit] =
     commands
