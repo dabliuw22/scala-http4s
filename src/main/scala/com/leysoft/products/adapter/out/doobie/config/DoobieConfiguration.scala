@@ -3,18 +3,22 @@ package com.leysoft.products.adapter.out.doobie.config
 import cats.effect.{Async, Blocker, ContextShift, Resource}
 import doobie.hikari._
 import doobie.util.ExecutionContexts
+import eu.timepit.refined.auto._
+import eu.timepit.refined.api.Refined
+import eu.timepit.refined.collection.NonEmpty
+import eu.timepit.refined.numeric.Interval
 
-case class DoobieConfiguration[P[_]: Async]()(implicit cf: ContextShift[P]) {
+case class DoobieConfiguration[P[_]: Async: ContextShift]() {
 
-  private val driver = "org.postgresql.Driver"
+  private val driver: String Refined NonEmpty = "org.postgresql.Driver"
 
-  private val url = "jdbc:postgresql://localhost:5432/http4s_db"
+  private val url: String Refined NonEmpty = "jdbc:postgresql://localhost:5432/http4s_db"
 
-  private val user = "http4s"
+  private val user: String Refined NonEmpty = "http4s"
 
-  private val password = "http4s"
+  private val password: String Refined NonEmpty = "http4s"
 
-  private val threadSize = 10
+  private val threadSize: Int Refined Interval.Open[0, 32] = 10
 
   lazy val transactor: Resource[P, HikariTransactor[P]] = for {
     context <- ExecutionContexts.fixedThreadPool[P](threadSize)

@@ -11,6 +11,7 @@ object Dependencies {
   lazy val scalaTestPlusVersion = "3.1.0.1"
 
   def cats(artifact: String): ModuleID = "org.typelevel" %% artifact % "2.0.0"
+  def refined(artifact: String): ModuleID = "eu.timepit" %% artifact % "0.9.13"
   def monix(artifact: String): ModuleID = "io.monix" %% artifact % "3.1.0"
   def fs2(artifact: String): ModuleID = "co.fs2" %% artifact % "2.2.1"
   def doobie(artifact: String): ModuleID = "org.tpolecat" %% artifact % "0.8.6"
@@ -28,6 +29,8 @@ object Dependencies {
     cats("cats-kernel"),
     cats("cats-core"),
     cats("cats-effect"),
+    refined("refined"),
+    refined("refined-cats"),
     monix("monix-eval"),
     monix("monix-execution"),
     fs2("fs2-core"),
