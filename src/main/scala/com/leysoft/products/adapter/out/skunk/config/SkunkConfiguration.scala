@@ -5,20 +5,21 @@ import eu.timepit.refined.auto._
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.numeric.{Interval, Positive}
+import eu.timepit.refined.types.string.NonEmptyString
 import natchez.Trace
 import skunk.{Session, SessionPool}
 
-case class SkunkConfiguration[P[_]: ConcurrentEffect: ContextShift: Trace]() {
+final case class SkunkConfiguration[P[_]: ConcurrentEffect: ContextShift: Trace]() {
 
-  private val host: String Refined NonEmpty = "localhost"
+  private val host: NonEmptyString = "localhost"
 
   private val port: Int Refined Positive = 5432
 
-  private val user: String Refined NonEmpty = "http4s"
+  private val user: NonEmptyString = "http4s"
 
-  private val password: String Refined NonEmpty = "http4s"
+  private val password: NonEmptyString = "http4s"
 
-  private val database: String Refined NonEmpty = "http4s_db"
+  private val database: NonEmptyString = "http4s_db"
 
   private val threadSize: Int Refined Interval.Open[0, 32] = 10
 

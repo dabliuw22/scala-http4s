@@ -5,18 +5,18 @@ import doobie.hikari._
 import doobie.util.ExecutionContexts
 import eu.timepit.refined.auto._
 import eu.timepit.refined.api.Refined
-import eu.timepit.refined.collection.NonEmpty
 import eu.timepit.refined.numeric.Interval
+import eu.timepit.refined.types.string.NonEmptyString
 
-case class DoobieConfiguration[P[_]: Async: ContextShift]() {
+final case class DoobieConfiguration[P[_]: Async: ContextShift]() {
 
-  private val driver: String Refined NonEmpty = "org.postgresql.Driver"
+  private val driver: NonEmptyString = "org.postgresql.Driver"
 
-  private val url: String Refined NonEmpty = "jdbc:postgresql://localhost:5432/http4s_db"
+  private val url: NonEmptyString = "jdbc:postgresql://localhost:5432/http4s_db"
 
-  private val user: String Refined NonEmpty = "http4s"
+  private val user: NonEmptyString = "http4s"
 
-  private val password: String Refined NonEmpty = "http4s"
+  private val password: NonEmptyString = "http4s"
 
   private val threadSize: Int Refined Interval.Open[0, 32] = 10
 

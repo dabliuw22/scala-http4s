@@ -10,6 +10,7 @@ import natchez.Trace.Implicits.noop
 import org.http4s.server.blaze.BlazeServerBuilder
 
 object ApiCats extends IOApp {
+  import com.leysoft.products.adapter.config._
   import org.http4s.implicits._ // for orNotFound
   // import cats.implicits._ // for <+> and BlazeServerBuilder.as
   // import org.http4s._ // for Request, Response, HttpRoutes
@@ -20,12 +21,14 @@ object ApiCats extends IOApp {
       .use { resource =>
         resource.use { session =>
           for {
+            conf <- config.load[IO]
             repository <- SkunkProductRepository.make[IO](session)
             service <- DefaultProductService.make[IO](repository)
             api <- ProductRoute.make[IO](service)
             error <- ErrorHandler.make[IO]
             _ <- BlazeServerBuilder[IO]
-                  .bindHttp(port = 8080, host = "localhost")
+                  .bindHttp(port = conf.api.port.value,
+                            host = conf.api.host.value)
                   .withHttpApp(api.routes(error.handler).orNotFound)
                   .serve
                   .compile

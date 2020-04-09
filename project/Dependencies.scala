@@ -19,6 +19,7 @@ object Dependencies {
   def redis4Cats(artifact: String): ModuleID = "dev.profunktor" %% artifact % "0.9.3"
   def http4s(artifact: String): ModuleID = "org.http4s" %% artifact % "0.21.0-SNAPSHOT"
   def circe(artifact: String): ModuleID = "io.circe" %% artifact % "0.12.3"
+  def ciris(artifact: String): ModuleID = "is.cir" %% artifact % "1.0.4"
   def log4cats(artifact: String): ModuleID = "io.chrisdavenport" %% artifact % "1.0.1"
   def scalaLog(artifact: String): ModuleID = "com.typesafe.scala-logging" %% artifact % "3.9.2"
   def logback(artifact: String): ModuleID = "ch.qos.logback" % artifact % "1.2.3"
@@ -45,6 +46,9 @@ object Dependencies {
     http4s("http4s-circe"),
     circe("circe-generic"),
     circe("circe-literal"),
+    ciris("ciris"),
+    ciris("ciris-enumeratum"),
+    ciris("ciris-refined"),
     scalaLog("scala-logging"),
     logback("logback-classic"),
     logbackEncoder("logstash-logback-encoder"),
