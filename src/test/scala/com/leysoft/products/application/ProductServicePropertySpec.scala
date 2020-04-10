@@ -9,7 +9,8 @@ final class ProductServicePropertySpec extends PropertySpec {
 
   def productRepository(product: domain.Product): TestProductRepository =
     new TestProductRepository {
-      override def findBy(id: String): IO[Option[domain.Product]] = IO.pure(Some(product))
+      override def findBy(id: String): IO[Option[domain.Product]] =
+        IO.pure(Some(product))
     }
 
   forAll { product: domain.Product =>

@@ -10,7 +10,9 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 import scala.concurrent.ExecutionContext
 
-protected[products] abstract class PropertySpec extends AsyncFunSuite with ScalaCheckDrivenPropertyChecks {
+protected[products] abstract class PropertySpec
+    extends AsyncFunSuite
+    with ScalaCheckDrivenPropertyChecks {
 
   implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
@@ -18,6 +20,8 @@ protected[products] abstract class PropertySpec extends AsyncFunSuite with Scala
 
   private def unique(name: String): String = s"$name - ${UUID.randomUUID()}"
 
-  def spec(testName: String)(f: => IO[Assertion])(implicit position: Position): Unit =
+  def spec(
+    testName: String
+  )(f: => IO[Assertion])(implicit position: Position): Unit =
     test(unique(testName))(IO.suspend(f).unsafeToFuture())
 }
