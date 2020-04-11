@@ -4,7 +4,7 @@ resolvers += Resolver.sonatypeRepo("snapshots")
 
 libraryDependencies ++= (dependencies ++ testDependencies)
 
-scalacOptions ++= Seq(
+lazy val options =  Seq(
   "-feature",
   "-deprecation",
   "-unchecked",
@@ -17,6 +17,7 @@ lazy val commonSettings = Seq(
   version := "0.1",
   organization := "com.leysoft",
   scalaVersion := "2.13.1",
+  scalacOptions := options,
   scalafmtOnCompile in ThisBuild := true,
   assemblyMergeStrategy in assembly := {
     case PathList("META-INF", xs @ _*) => MergeStrategy.discard
