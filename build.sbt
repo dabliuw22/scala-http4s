@@ -1,9 +1,5 @@
 import Dependencies._
 
-resolvers += Resolver.sonatypeRepo("snapshots")
-
-libraryDependencies ++= (dependencies ++ testDependencies)
-
 lazy val options =  Seq(
   "-feature",
   "-deprecation",
@@ -28,6 +24,8 @@ lazy val commonSettings = Seq(
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
   .settings(
+    resolvers += Resolver.sonatypeRepo("snapshots"),
+    libraryDependencies ++= (dependencies ++ testDependencies),
     mainClass in assembly := Some("com.leysoft.ApiCats"),
     assemblyJarName in assembly := "api-cats.jar"
   )

@@ -7,6 +7,7 @@ import com.leysoft.products.adapter.out.skunk.SkunkProductRepository
 import com.leysoft.products.adapter.out.skunk.config.SkunkConfiguration
 import com.leysoft.products.application.DefaultProductService
 import natchez.Trace.Implicits.noop
+import eu.timepit.refined.auto._
 import org.http4s.server.blaze.BlazeServerBuilder
 
 object ApiCats extends IOApp {
@@ -27,8 +28,7 @@ object ApiCats extends IOApp {
             api <- ProductRoute.make[IO](service)
             error <- ErrorHandler.make[IO]
             _ <- BlazeServerBuilder[IO]
-                  .bindHttp(port = conf.api.port.value,
-                            host = conf.api.host.value)
+                  .bindHttp(port = conf.api.port, host = conf.api.host)
                   .withHttpApp(api.routes(error.handler).orNotFound)
                   .serve
                   .compile
