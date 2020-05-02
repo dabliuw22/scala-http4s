@@ -1,6 +1,7 @@
 package com.leysoft.products.adapter.in.api
 
 import cats.effect.Async
+import com.leysoft.products.adapter.auth.Auth.AuthUserException
 import com.leysoft.products.domain.error.{ProductNotFoundException, ProductWritingException}
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.Response
@@ -29,6 +30,10 @@ package object error {
         )
       case error: ProductWritingException =>
         logger.error(s"Error: ${error.getMessage}") *> Conflict(
+          ErrorResponse(error.getMessage)
+        )
+      case error: AuthUserException =>
+        logger.error(s"Error: ${error.getMessage}") *> Forbidden(
           ErrorResponse(error.getMessage)
         )
       case error =>
