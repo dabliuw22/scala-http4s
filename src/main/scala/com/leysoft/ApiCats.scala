@@ -25,19 +25,21 @@ object ApiCats extends IOApp {
         resource.use { session =>
           for {
             conf <- config.load[IO]
-            userRepository <- InMemoryUserRepository.make[IO]
-            auth <- AuthService.make[IO](userRepository)
-            middleware <- auth.middleware
             repository <- SkunkProductRepository.make[IO](session)
             service <- DefaultProductService.make[IO](repository)
+            error <- ErrorHandler.make[IO]
+            handler <- error.handler
+            userRepository <- InMemoryUserRepository.make[IO]
+            auth <- AuthService.make[IO](conf.auth, userRepository)
+            middleware <- auth.middleware
             login <- LoginRoute.make[IO](auth)
             api <- ProductRoute.make[IO](service)
-            error <- ErrorHandler.make[IO]
             _ <- BlazeServerBuilder[IO]
-                  .bindHttp(port = conf.api.port, host = conf.api.host)
+                  .bindHttp(port = conf.api.port.value,
+                            host = conf.api.host.value)
                   .withHttpApp(
-                    (api.routes(middleware, error.handler) <+> login
-                      .routes(error.handler)).orNotFound
+                    (api.routes(middleware, handler) <+> login
+                      .routes(handler)).orNotFound
                   )
                   .serve
                   .compile

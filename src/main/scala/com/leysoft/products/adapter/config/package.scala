@@ -8,10 +8,13 @@ import enumeratum.{CirisEnum, Enum, EnumEntry}
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.auto._
 import eu.timepit.refined.cats._
-import eu.timepit.refined.collection.MinSize
+import eu.timepit.refined.collection.{MaxSize, MinSize}
+import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.string.NonEmptyString
 import eu.timepit.refined.W
 import eu.timepit.refined.types.net.UserPortNumber
+
+import scala.concurrent.duration._
 
 package object config {
 
@@ -30,7 +33,13 @@ package object config {
 
   type AuthSecretKey = String Refined MinSize[W.`10`.T]
 
-  final case class AuthConfiguration(secretKey: Secret[AuthSecretKey])
+  type AuthAlgorithm = String Refined MaxSize[W.`5`.T]
+
+  type AuthExpirationSeconds = FiniteDuration
+
+  final case class AuthConfiguration(secretKey: Secret[AuthSecretKey],
+                                     algorithm: AuthAlgorithm,
+                                     expiration: AuthExpirationSeconds)
 
   type DatabasePassword = String Refined MinSize[W.`5`.T]
 
@@ -66,11 +75,19 @@ package object config {
       }
 
   val authConfig: ConfigValue[AuthConfiguration] =
-    env("AUTH_SECRET_KEY")
-      .as[AuthSecretKey]
-      .default("shg4k58shdgfb3dbdn9024")
-      .secret
-      .map(secretKey => AuthConfiguration(secretKey))
+    (env("AUTH_SECRET_KEY")
+       .as[AuthSecretKey]
+       .default("shg4k58shdgfb3dbdn9024")
+       .secret,
+     env("AUTH_ALGORITHM").as[AuthAlgorithm].default("HS512"),
+     env("AUTH_EXPIRATION_SECONDS")
+       .as[PosInt]
+       .default(600)
+       .map(s => FiniteDuration.apply(s.value, SECONDS)))
+      .parMapN(
+        (secretKey, algorithm, expiration) =>
+          AuthConfiguration(secretKey, algorithm, expiration)
+      )
 
   val config: ConfigValue[Configuration] =
     env("API_ENV")

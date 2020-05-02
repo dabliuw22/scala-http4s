@@ -13,6 +13,7 @@ import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.server.blaze.BlazeServerBuilder
 
 object ApiRedisCats extends IOApp {
+  import com.leysoft.products.adapter.config._
   import org.http4s.implicits._ // for orNotFound
   import cats.syntax.semigroupk._ // for <+>
   implicit val logger = Slf4jLogger.getLogger[IO]
@@ -22,20 +23,23 @@ object ApiRedisCats extends IOApp {
       .redis[IO]
       .use { commands =>
         for {
-          userRepository <- InMemoryUserRepository.make[IO]
-          auth <- AuthService.make[IO](userRepository)
-          middleware <- auth.middleware
+          conf <- config.load[IO]
           redisUtil <- DefaultRedisUtil.make(commands)
           repository <- RedisProductRepository.make[IO](redisUtil)
           service <- DefaultProductService.make[IO](repository)
+          error <- ErrorHandler.make[IO]
+          handler <- error.handler
+          userRepository <- InMemoryUserRepository.make[IO]
+          auth <- AuthService.make[IO](conf.auth, userRepository)
+          middleware <- auth.middleware
           login <- LoginRoute.make[IO](auth)
           api <- ProductRoute.make[IO](service)
-          error <- ErrorHandler.make[IO]
           _ <- BlazeServerBuilder[IO]
-                .bindHttp(port = 8080, host = "localhost")
+                .bindHttp(port = conf.api.port.value,
+                          host = conf.api.host.value)
                 .withHttpApp(
-                  (api.routes(middleware, error.handler) <+> login
-                    .routes(error.handler)).orNotFound
+                  (api.routes(middleware, handler) <+> login
+                    .routes(handler)).orNotFound
                 )
                 .serve
                 .compile

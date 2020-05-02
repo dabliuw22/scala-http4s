@@ -1,11 +1,16 @@
 package com.leysoft.products.adapter.auth
 
 import cats.effect.{Effect, Sync}
+import com.leysoft.products.adapter.config.AuthConfiguration
 import dev.profunktor.auth.JwtAuthMiddleware
 import dev.profunktor.auth.jwt._
 import io.circe.{Decoder, Encoder, Json}
+import org.http4s.Response
 import org.http4s.server.AuthMiddleware
+import pdi.jwt.algorithms.JwtHmacAlgorithm
 import pdi.jwt.{JwtAlgorithm, JwtClaim}
+
+import scala.concurrent.duration.FiniteDuration
 
 object Auth {
   import Codecs._
@@ -63,10 +68,14 @@ object Auth {
   case class User(username: AuthUserUsername)
 
   final class AuthService[P[_]: Sync] private (
-    val authRepository: AuthRepository[P],
+    val authConfig: AuthConfiguration,
+    val authRepository: AuthRepository[P]
   )(implicit val clock: java.time.Clock) {
-    import AuthService._
     import io.circe.parser.decode
+
+    private val secretKey = JwtSecretKey(authConfig.secretKey.value.value)
+
+    private val algorithm = JwtAlgorithm.HS512
 
     private val jwtAuth = JwtAuth.hmac(secretKey.value, algorithm)
 
@@ -86,7 +95,9 @@ object Auth {
         }
 
     val middleware: P[AuthMiddleware[P, User]] =
-      Sync[P].delay(JwtAuthMiddleware[P, User](jwtAuth, authenticate))
+      Sync[P].delay(
+        JwtAuthMiddleware[P, User](jwtAuth, authenticate)
+      )
 
     /*
     def authenticate(token: JwtToken)(claim: JwtClaim): P[Option[User]] =
@@ -107,7 +118,7 @@ object Auth {
                   Sync[P]
                     .delay(
                       JwtClaim(content = user.toUser.asJson.noSpaces).issuedNow
-                        .expiresIn(expiration.toMillis)
+                        .expiresIn(authConfig.expiration.toSeconds)
                     )
                 else throw AuthUserException("Invalid Credentials")
         token <- jwtEncode[P](claim, secretKey, algorithm)
@@ -115,19 +126,13 @@ object Auth {
   }
 
   object AuthService {
-    import scala.concurrent.duration._
-
-    private val secretKey = JwtSecretKey("secretKeyTest")
-
-    private val algorithm = JwtAlgorithm.HS512
-
-    private val expiration = 10 minutes
 
     def make[P[_]: Sync](
+      authConfig: AuthConfiguration,
       authRepository: AuthRepository[P]
     ): P[AuthService[P]] =
       Sync[P]
         .delay(java.time.Clock.systemUTC)
-        .map(implicit clock => new AuthService[P](authRepository))
+        .map(implicit clock => new AuthService[P](authConfig, authRepository))
   }
 }
