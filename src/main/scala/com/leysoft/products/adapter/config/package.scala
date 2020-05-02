@@ -8,10 +8,13 @@ import enumeratum.{CirisEnum, Enum, EnumEntry}
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.auto._
 import eu.timepit.refined.cats._
-import eu.timepit.refined.collection.MinSize
+import eu.timepit.refined.collection.{MaxSize, MinSize}
+import eu.timepit.refined.types.numeric.PosInt
 import eu.timepit.refined.types.string.NonEmptyString
 import eu.timepit.refined.W
 import eu.timepit.refined.types.net.UserPortNumber
+
+import scala.concurrent.duration._
 
 package object config {
 
@@ -28,6 +31,16 @@ package object config {
     override def values: IndexedSeq[Environment] = findValues
   }
 
+  type AuthSecretKey = String Refined MinSize[W.`10`.T]
+
+  type AuthAlgorithm = String Refined MaxSize[W.`5`.T]
+
+  type AuthExpirationSeconds = FiniteDuration
+
+  final case class AuthConfiguration(secretKey: Secret[AuthSecretKey],
+                                     algorithm: AuthAlgorithm,
+                                     expiration: AuthExpirationSeconds)
+
   type DatabasePassword = String Refined MinSize[W.`5`.T]
 
   final case class DatabaseConfiguration(
@@ -43,7 +56,8 @@ package object config {
   final case class Configuration(
     environment: Environment,
     api: ApiConfiguration,
-    database: DatabaseConfiguration
+    database: DatabaseConfiguration,
+    auth: AuthConfiguration
   )
 
   val apiConfig: ConfigValue[ApiConfiguration] =
@@ -60,14 +74,29 @@ package object config {
         DatabaseConfiguration(user, password)
       }
 
+  val authConfig: ConfigValue[AuthConfiguration] =
+    (env("AUTH_SECRET_KEY")
+       .as[AuthSecretKey]
+       .default("shg4k58shdgfb3dbdn9024")
+       .secret,
+     env("AUTH_ALGORITHM").as[AuthAlgorithm].default("HS512"),
+     env("AUTH_EXPIRATION_SECONDS")
+       .as[PosInt]
+       .default(600)
+       .map(s => FiniteDuration.apply(s.value, SECONDS)))
+      .parMapN(
+        (secretKey, algorithm, expiration) =>
+          AuthConfiguration(secretKey, algorithm, expiration)
+      )
+
   val config: ConfigValue[Configuration] =
     env("API_ENV")
       .as[Environment]
       .default(Environment.Local)
       .flatMap { env =>
-        (apiConfig, databaseConfig)
-          .parMapN { (api, database) =>
-            Configuration(env, api, database)
+        (apiConfig, databaseConfig, authConfig)
+          .parMapN { (api, database, auth) =>
+            Configuration(env, api, database, auth)
           }
       }
 }

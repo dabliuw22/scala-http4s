@@ -18,6 +18,7 @@ object Dependencies {
   def skunk(artifact: String): ModuleID = "org.tpolecat" %% artifact % "0.0.7"
   def redis4Cats(artifact: String): ModuleID = "dev.profunktor" %% artifact % "0.9.3"
   def http4s(artifact: String): ModuleID = "org.http4s" %% artifact % "0.21.0-SNAPSHOT"
+  def http4sJwtAuth(artifact: String) : ModuleID = "dev.profunktor" %% artifact % "0.0.4"
   def circe(artifact: String): ModuleID = "io.circe" %% artifact % "0.12.3"
   def ciris(artifact: String): ModuleID = "is.cir" %% artifact % "1.0.4"
   def log4cats(artifact: String): ModuleID = "io.chrisdavenport" %% artifact % "1.0.1"
@@ -44,8 +45,10 @@ object Dependencies {
     http4s("http4s-dsl"),
     http4s("http4s-blaze-server"),
     http4s("http4s-circe"),
+    http4sJwtAuth("http4s-jwt-auth"),
     circe("circe-generic"),
     circe("circe-literal"),
+    circe("circe-parser"),
     ciris("ciris"),
     ciris("ciris-enumeratum"),
     ciris("ciris-refined"),

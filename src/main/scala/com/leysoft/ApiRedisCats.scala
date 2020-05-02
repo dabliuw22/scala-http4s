@@ -1,6 +1,8 @@
 package com.leysoft
 
 import cats.effect.{ExitCode, IO, IOApp}
+import com.leysoft.products.adapter.auth.Auth.{AuthService, InMemoryUserRepository}
+import com.leysoft.products.adapter.auth.LoginRoute
 import com.leysoft.products.adapter.in.api.ProductRoute
 import com.leysoft.products.adapter.in.api.error.ErrorHandler
 import com.leysoft.products.adapter.out.redis.RedisProductRepository
@@ -11,7 +13,9 @@ import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.server.blaze.BlazeServerBuilder
 
 object ApiRedisCats extends IOApp {
-  import org.http4s.implicits._
+  import com.leysoft.products.adapter.config._
+  import org.http4s.implicits._ // for orNotFound
+  import cats.syntax.semigroupk._ // for <+>
   implicit val logger = Slf4jLogger.getLogger[IO]
 
   override def run(args: List[String]): IO[ExitCode] =
@@ -19,14 +23,24 @@ object ApiRedisCats extends IOApp {
       .redis[IO]
       .use { commands =>
         for {
+          conf <- config.load[IO]
           redisUtil <- DefaultRedisUtil.make(commands)
           repository <- RedisProductRepository.make[IO](redisUtil)
           service <- DefaultProductService.make[IO](repository)
-          api <- ProductRoute.make[IO](service)
           error <- ErrorHandler.make[IO]
+          handler <- error.handler
+          userRepository <- InMemoryUserRepository.make[IO]
+          auth <- AuthService.make[IO](conf.auth, userRepository)
+          middleware <- auth.middleware
+          login <- LoginRoute.make[IO](auth)
+          api <- ProductRoute.make[IO](service)
           _ <- BlazeServerBuilder[IO]
-                .bindHttp(port = 8080, host = "localhost")
-                .withHttpApp(api.routes(error.handler).orNotFound)
+                .bindHttp(port = conf.api.port.value,
+                          host = conf.api.host.value)
+                .withHttpApp(
+                  (api.routes(middleware, handler) <+> login
+                    .routes(handler)).orNotFound
+                )
                 .serve
                 .compile
                 .drain

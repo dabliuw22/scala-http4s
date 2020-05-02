@@ -1,6 +1,8 @@
 package com.leysoft
 
 import cats.effect.{ExitCode, IO, IOApp}
+import com.leysoft.products.adapter.auth.Auth.{AuthService, InMemoryUserRepository}
+import com.leysoft.products.adapter.auth.LoginRoute
 import com.leysoft.products.adapter.in.api.ProductRoute
 import com.leysoft.products.adapter.in.api.error.ErrorHandler
 import com.leysoft.products.adapter.out.skunk.SkunkProductRepository
@@ -13,7 +15,7 @@ import org.http4s.server.blaze.BlazeServerBuilder
 object ApiCats extends IOApp {
   import com.leysoft.products.adapter.config._
   import org.http4s.implicits._ // for orNotFound
-  // import cats.implicits._ // for <+> and BlazeServerBuilder.as
+  import cats.syntax.semigroupk._ // for <+>
   // import org.http4s._ // for Request, Response, HttpRoutes
   // import org.http4s.dsl.io._ // for NotFound, Conflict, InternalServerError, Http4sDsl[IO]
 
@@ -25,11 +27,20 @@ object ApiCats extends IOApp {
             conf <- config.load[IO]
             repository <- SkunkProductRepository.make[IO](session)
             service <- DefaultProductService.make[IO](repository)
-            api <- ProductRoute.make[IO](service)
             error <- ErrorHandler.make[IO]
+            handler <- error.handler
+            userRepository <- InMemoryUserRepository.make[IO]
+            auth <- AuthService.make[IO](conf.auth, userRepository)
+            middleware <- auth.middleware
+            login <- LoginRoute.make[IO](auth)
+            api <- ProductRoute.make[IO](service)
             _ <- BlazeServerBuilder[IO]
-                  .bindHttp(port = conf.api.port, host = conf.api.host)
-                  .withHttpApp(api.routes(error.handler).orNotFound)
+                  .bindHttp(port = conf.api.port.value,
+                            host = conf.api.host.value)
+                  .withHttpApp(
+                    (api.routes(middleware, handler) <+> login
+                      .routes(handler)).orNotFound
+                  )
                   .serve
                   .compile
                   .drain

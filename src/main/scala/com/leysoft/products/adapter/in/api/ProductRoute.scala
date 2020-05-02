@@ -1,11 +1,12 @@
 package com.leysoft.products.adapter.in.api
 
-import cats.effect.{Async, Effect}
+import cats.effect.{Effect}
+import com.leysoft.products.adapter.auth.Auth.User
 import com.leysoft.products.domain.Product
 import com.leysoft.products.application.ProductService
 import org.http4s.dsl.Http4sDsl
-import org.http4s.server.Router
-import org.http4s.{HttpRoutes, Response}
+import org.http4s.server.{AuthMiddleware, Router}
+import org.http4s.{AuthedRoutes, HttpRoutes, Response}
 
 final class ProductRoute[P[_]: Effect] private (
   productService: ProductService[P]
@@ -23,37 +24,37 @@ final class ProductRoute[P[_]: Effect] private (
 
   private def httpRoutes(
     errorHandler: PartialFunction[Throwable, P[Response[P]]]
-  ) = HttpRoutes.of[P] {
-    case GET -> Root =>
+  ): AuthedRoutes[User, P] = AuthedRoutes.of {
+    case GET -> Root as user =>
       productService.getAll
         .map(_.asJson)
         .flatMap(Ok(_))
         .recoverWith(errorHandler)
-    case GET -> Root / "streams" =>
+    case GET -> Root / "streams" as user =>
       StreamArray
         .make(productService.getAllStreams)
         .flatMap(Ok(_))
         .recoverWith(errorHandler)
-    case GET -> Root / UUIDVar(productId) =>
+    case GET -> Root / UUIDVar(productId) as user =>
       productService
         .get(productId.toString)
         .map(_.asJson)
         .flatMap(Ok(_))
         .handleErrorWith(errorHandler)
-    case request @ POST -> Root =>
-      request
+    case request @ POST -> Root as user =>
+      request.req
         .as[Product]
         .flatMap(productService.create)
         .flatMap(Created(_))
         .handleErrorWith(errorHandler)
-    case request @ PUT -> Root / UUIDVar(productId) =>
-      request
+    case request @ PUT -> Root / UUIDVar(productId) as user =>
+      request.req
         .as[Product]
         .map(product => product.copy(id = productId.toString))
         .flatMap(productService.update)
         .flatMap(Ok(_))
         .handleErrorWith(errorHandler)
-    case DELETE -> Root / UUIDVar(productId) =>
+    case DELETE -> Root / UUIDVar(productId) as user =>
       productService
         .remove(productId.toString)
         .map(_.asJson)
@@ -62,13 +63,14 @@ final class ProductRoute[P[_]: Effect] private (
   }
 
   def routes(
+    auth: AuthMiddleware[P, User],
     errorHandler: PartialFunction[Throwable, P[Response[P]]]
   ): HttpRoutes[P] =
-    Router(PREFIX -> httpRoutes(errorHandler))
+    Router(PREFIX -> auth(httpRoutes(errorHandler)))
 }
 
 object ProductRoute {
 
-  def make[P[_]: Effect](service: ProductService[P])(): P[ProductRoute[P]] =
+  def make[P[_]: Effect](service: ProductService[P]): P[ProductRoute[P]] =
     Effect[P].delay(new ProductRoute[P](service))
 }

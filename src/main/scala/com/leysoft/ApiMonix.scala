@@ -1,6 +1,8 @@
 package com.leysoft
 
 import cats.effect.{ContextShift, ExitCode, Timer}
+import com.leysoft.products.adapter.auth.Auth.{AuthService, InMemoryUserRepository}
+import com.leysoft.products.adapter.auth.LoginRoute
 import com.leysoft.products.adapter.in.api.ProductRoute
 import com.leysoft.products.adapter.in.api.error.ErrorHandler
 import com.leysoft.products.adapter.out.doobie.DoobieProductRepository
@@ -12,7 +14,9 @@ import monix.execution.Scheduler
 import org.http4s.server.blaze.BlazeServerBuilder
 
 object ApiMonix extends TaskApp {
+  import com.leysoft.products.adapter.config._
   import org.http4s.implicits._ // for orNotFound
+  import cats.syntax.semigroupk._ // for <+>
   implicit val contextShift: ContextShift[Task] = Task.contextShift(scheduler)
   implicit val timer: Timer[Task] = Task.timer(Scheduler.io())
 
@@ -20,14 +24,24 @@ object ApiMonix extends TaskApp {
     DoobieConfiguration[Task].transactor
       .use { transactor =>
         for {
+          conf <- config.load[Task]
           db <- HikariDoobieUtil.make[Task](transactor)
           repository <- DoobieProductRepository.make[Task](db)
           service <- DefaultProductService.make[Task](repository)
-          api <- ProductRoute.make[Task](service)
           error <- ErrorHandler.make[Task]
+          handler <- error.handler
+          userRepository <- InMemoryUserRepository.make[Task]
+          auth <- AuthService.make[Task](conf.auth, userRepository)
+          middleware <- auth.middleware
+          login <- LoginRoute.make[Task](auth)
+          api <- ProductRoute.make[Task](service)
           _ <- BlazeServerBuilder[Task]
-                .bindHttp(port = 8080, host = "localhost")
-                .withHttpApp(api.routes(error.handler).orNotFound)
+                .bindHttp(port = conf.api.port.value,
+                          host = conf.api.host.value)
+                .withHttpApp(
+                  (api.routes(middleware, handler) <+> login
+                    .routes(handler)).orNotFound
+                )
                 .serve
                 .compile
                 .drain
