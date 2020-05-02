@@ -28,6 +28,10 @@ package object config {
     override def values: IndexedSeq[Environment] = findValues
   }
 
+  type AuthSecretKey = String Refined MinSize[W.`10`.T]
+
+  final case class AuthConfiguration(secretKey: Secret[AuthSecretKey])
+
   type DatabasePassword = String Refined MinSize[W.`5`.T]
 
   final case class DatabaseConfiguration(
@@ -43,7 +47,8 @@ package object config {
   final case class Configuration(
     environment: Environment,
     api: ApiConfiguration,
-    database: DatabaseConfiguration
+    database: DatabaseConfiguration,
+    auth: AuthConfiguration
   )
 
   val apiConfig: ConfigValue[ApiConfiguration] =
@@ -60,14 +65,21 @@ package object config {
         DatabaseConfiguration(user, password)
       }
 
+  val authConfig: ConfigValue[AuthConfiguration] =
+    env("AUTH_SECRET_KEY")
+      .as[AuthSecretKey]
+      .default("shg4k58shdgfb3dbdn9024")
+      .secret
+      .map(secretKey => AuthConfiguration(secretKey))
+
   val config: ConfigValue[Configuration] =
     env("API_ENV")
       .as[Environment]
       .default(Environment.Local)
       .flatMap { env =>
-        (apiConfig, databaseConfig)
-          .parMapN { (api, database) =>
-            Configuration(env, api, database)
+        (apiConfig, databaseConfig, authConfig)
+          .parMapN { (api, database, auth) =>
+            Configuration(env, api, database, auth)
           }
       }
 }

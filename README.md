@@ -15,18 +15,32 @@ Requirements:
 2. Run App.
 
 3. Test with cURL:
+    * Login:
+        ```
+        curl --location --request POST 'http://localhost:8080/login' \
+        --header 'Content-Type: application/json' \
+        --data-raw '{
+        	"username": "username1",
+        	"password": "password1"
+        }'
+        ```
+      
+
     * All Products:
         ```
-        curl --location --request GET 'http://localhost:8080/products'
+        curl --location --request GET 'http://localhost:8080/products' \
+        --header 'Authorization: Bearer ${YOUR_ACCESS_TOKEN}'
         ```
     * Get Product By ID:
         ```
-        curl --location --request GET 'http://localhost:8080/products/{UUID}'
+        curl --location --request GET 'http://localhost:8080/products/{UUID}' \
+        --header 'Authorization: Bearer ${YOUR_ACCESS_TOKEN}'
         ```
     * Create Product:
         ```
         curl --location --request POST 'http://localhost:8080/products' \
         --header 'Content-Type: application/json' \
+        --header 'Authorization: Bearer ${YOUR_ACCESS_TOKEN}' \
         --data-raw '{
             "name": "Your Product Name",
             "stock": 30.0
@@ -36,6 +50,7 @@ Requirements:
         ```
         curl --location --request PUT 'http://localhost:8080/products/{UUID}' \
         --header 'Content-Type: application/json' \
+        --header 'Authorization: Bearer ${YOUR_ACCESS_TOKEN}' \
         --data-raw '{
             "name": "Your New Product Name",
             "stock": 32.0
@@ -44,5 +59,6 @@ Requirements:
     * Delete Product:
         ```
         curl --location --request DELETE 'http://localhost:8080/products/{UUID}' \
-        --header 'Content-Type: application/json'
+        --header 'Content-Type: application/json' \
+        --header 'Authorization: Bearer ${YOUR_ACCESS_TOKEN}'
         ```
