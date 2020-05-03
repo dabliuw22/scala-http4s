@@ -20,7 +20,7 @@ sealed trait DoobieUtil[P[_]] {
 }
 
 final class HikariDoobieUtil[P[_]: Async: ContextShift] private (
-  transactor: HikariTransactor[P]
+  implicit transactor: HikariTransactor[P]
 ) extends DoobieUtil[P] {
   import cats.syntax.apply._
 
@@ -51,7 +51,7 @@ final class HikariDoobieUtil[P[_]: Async: ContextShift] private (
 object HikariDoobieUtil {
 
   def make[P[_]: Async: ContextShift](
-    transactor: HikariTransactor[P]
+    implicit transactor: HikariTransactor[P]
   ): P[HikariDoobieUtil[P]] =
-    Async[P].delay(new HikariDoobieUtil[P](transactor))
+    Async[P].delay(new HikariDoobieUtil[P])
 }

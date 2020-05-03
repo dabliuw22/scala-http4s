@@ -17,7 +17,7 @@ sealed trait RedisUtil[P[_]] {
 }
 
 final class DefaultRedisUtil[P[_]: Effect] private (
-  commands: RedisCommands[P, String, String]
+  implicit commands: RedisCommands[P, String, String]
 ) extends RedisUtil[P] {
   import cats.syntax.apply._
   import cats.syntax.functor._
@@ -44,7 +44,7 @@ final class DefaultRedisUtil[P[_]: Effect] private (
 object DefaultRedisUtil {
 
   def make[P[_]: Effect](
-    commands: RedisCommands[P, String, String]
+    implicit commands: RedisCommands[P, String, String]
   ): P[RedisUtil[P]] =
-    Effect[P].delay(new DefaultRedisUtil(commands))
+    Effect[P].delay(new DefaultRedisUtil)
 }

@@ -7,8 +7,9 @@ import fs2.Stream
 import skunk.Session
 import skunk.data.Completion
 
-final class SkunkProductRepository[P[_]: Effect] private (session: Session[P])
-    extends ProductRepository[P] {
+final class SkunkProductRepository[P[_]: Effect] private (
+  implicit session: Session[P]
+) extends ProductRepository[P] {
   import SkunkProductRepository._
   import cats.syntax.functor._
   import skunk.Void
@@ -62,8 +63,10 @@ object SkunkProductRepository {
   import skunk.implicits._
   import skunk.codec.all._
 
-  def make[P[_]: Effect](session: Session[P]): P[SkunkProductRepository[P]] =
-    Effect[P].delay(new SkunkProductRepository(session))
+  def make[P[_]: Effect](
+    implicit session: Session[P]
+  ): P[SkunkProductRepository[P]] =
+    Effect[P].delay(new SkunkProductRepository)
 
   def all: Query[Void, domain.Product] =
     sql"SELECT * FROM products"

@@ -21,10 +21,10 @@ object ApiRedisCats extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
     RedisConfiguration
       .redis[IO]
-      .use { commands =>
+      .use { implicit commands =>
         for {
           conf <- config.load[IO]
-          redisUtil <- DefaultRedisUtil.make(commands)
+          redisUtil <- DefaultRedisUtil.make[IO]
           repository <- RedisProductRepository.make[IO](redisUtil)
           service <- DefaultProductService.make[IO](repository)
           error <- ErrorHandler.make[IO]

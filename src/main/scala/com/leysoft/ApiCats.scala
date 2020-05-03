@@ -22,10 +22,10 @@ object ApiCats extends IOApp {
   override def run(args: List[String]): IO[ExitCode] =
     SkunkConfiguration[IO].session
       .use { resource =>
-        resource.use { session =>
+        resource.use { implicit session =>
           for {
             conf <- config.load[IO]
-            repository <- SkunkProductRepository.make[IO](session)
+            repository <- SkunkProductRepository.make[IO]
             service <- DefaultProductService.make[IO](repository)
             error <- ErrorHandler.make[IO]
             handler <- error.handler

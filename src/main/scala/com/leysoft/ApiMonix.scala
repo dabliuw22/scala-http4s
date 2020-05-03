@@ -22,10 +22,10 @@ object ApiMonix extends TaskApp {
 
   override def run(args: List[String]): Task[ExitCode] =
     DoobieConfiguration[Task].transactor
-      .use { transactor =>
+      .use { implicit transactor =>
         for {
           conf <- config.load[Task]
-          db <- HikariDoobieUtil.make[Task](transactor)
+          db <- HikariDoobieUtil.make[Task]
           repository <- DoobieProductRepository.make[Task](db)
           service <- DefaultProductService.make[Task](repository)
           error <- ErrorHandler.make[Task]
