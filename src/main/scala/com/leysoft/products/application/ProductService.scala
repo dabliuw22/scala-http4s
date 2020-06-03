@@ -1,8 +1,8 @@
 package com.leysoft.products.application
 
-import cats.Monad
+import cats.{Monad, MonadError}
 import cats.effect.Effect
-import com.leysoft.products.domain.error.{ProductNotFoundException, ProductWritingException}
+import com.leysoft.products.domain.error.{MonadThrow, ProductNotFoundException, ProductWritingException}
 import com.leysoft.products.domain.{Product, ProductRepository}
 import fs2.Stream
 
@@ -21,10 +21,10 @@ sealed trait ProductService[P[_]] {
   def remove(id: String): P[Boolean]
 }
 
-final class DefaultProductService[P[_]: Effect: Monad](
+final class DefaultProductService[P[_]: Effect: MonadThrow](
   productRepository: ProductRepository[P]
 ) extends ProductService[P] {
-  import cats.syntax.applicativeError._
+  import cats.syntax.monadError._
   import cats.syntax.functor._
 
   override def get(id: String): P[Product] =
@@ -35,15 +35,17 @@ final class DefaultProductService[P[_]: Effect: Monad](
         case _ =>
           throw ProductNotFoundException(s"Not Found Product By Id: $id")
       }
-      .handleError(e => throw ProductNotFoundException(e.getMessage))
+      .adaptError {
+        case e => ProductNotFoundException(e.getMessage)
+      }
 
   override def getAll: P[List[Product]] =
     productRepository.findAll
-      .handleError(e => throw ProductNotFoundException(e.getMessage))
+      .adaptError(e => ProductNotFoundException(e.getMessage))
 
   override def getAllStreams: Stream[P, Product] =
     productRepository.findAllAStreams
-      .handleError(e => throw ProductNotFoundException(e.getMessage))
+      .adaptError(e => ProductNotFoundException(e.getMessage))
 
   override def create(product: Product): P[Product] =
     productRepository
@@ -55,7 +57,7 @@ final class DefaultProductService[P[_]: Effect: Monad](
           product
         )
       }
-      .handleError(e => throw ProductWritingException(e.getMessage))
+      .adaptError(e => ProductWritingException(e.getMessage))
 
   override def update(product: Product): P[Product] =
     productRepository
@@ -67,7 +69,7 @@ final class DefaultProductService[P[_]: Effect: Monad](
           product
         )
       }
-      .handleError(e => throw ProductWritingException(e.getMessage))
+      .adaptError(e => ProductWritingException(e.getMessage))
 
   override def remove(id: String): P[Boolean] =
     productRepository
@@ -76,7 +78,7 @@ final class DefaultProductService[P[_]: Effect: Monad](
         case 0 => false
         case _ => true
       }
-      .handleError(e => throw ProductWritingException(e.getMessage))
+      .adaptError(e => ProductWritingException(e.getMessage))
 
   private def validate[A](count: Int, message: String, a: A): A = count match {
     case 0 => throw ProductWritingException(message)

@@ -2,20 +2,24 @@ package com.leysoft
 
 import cats.effect.{ExitCode, IO, IOApp}
 import com.leysoft.products.adapter.auth.Auth.{AuthService, InMemoryUserRepository}
-import com.leysoft.products.adapter.auth.LoginRoute
-import com.leysoft.products.adapter.in.api.ProductRoute
+import com.leysoft.products.adapter.in.api.{DefaultTracedService, LoginRoute, ProductRoute, TracedRoute}
 import com.leysoft.products.adapter.in.api.error.ErrorHandler
 import com.leysoft.products.adapter.out.skunk.SkunkProductRepository
 import com.leysoft.products.adapter.out.skunk.config.SkunkConfiguration
 import com.leysoft.products.application.DefaultProductService
+import dev.profunktor.tracer.Tracer
 import natchez.Trace.Implicits.noop
 import eu.timepit.refined.auto._
+import io.chrisdavenport.log4cats.Logger
+import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.server.blaze.BlazeServerBuilder
 
 object ApiCats extends IOApp {
   import com.leysoft.products.adapter.config._
   import org.http4s.implicits._ // for orNotFound
   import cats.syntax.semigroupk._ // for <+>
+  import dev.profunktor.tracer.instances.tracer._ // for Tracer
+  import dev.profunktor.tracer.instances.tracerlog._
   // import org.http4s._ // for Request, Response, HttpRoutes
   // import org.http4s.dsl.io._ // for NotFound, Conflict, InternalServerError, Http4sDsl[IO]
 
@@ -34,12 +38,16 @@ object ApiCats extends IOApp {
             middleware <- auth.middleware
             login <- LoginRoute.make[IO](auth)
             api <- ProductRoute.make[IO](service)
+            traceService <- DefaultTracedService.make[IO]
+            traced <- TracedRoute.make[IO](traceService)
             _ <- BlazeServerBuilder[IO]
                   .bindHttp(port = conf.api.port.value,
                             host = conf.api.host.value)
                   .withHttpApp(
-                    (api.routes(middleware, handler) <+> login
-                      .routes(handler)).orNotFound
+                    Tracer[IO].loggingMiddleware(
+                      (api.routes(middleware, handler) <+> login
+                        .routes(handler) <+> traced.routes(handler)).orNotFound
+                    )
                   )
                   .serve
                   .compile

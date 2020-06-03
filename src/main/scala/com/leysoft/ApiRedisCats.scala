@@ -2,8 +2,7 @@ package com.leysoft
 
 import cats.effect.{ExitCode, IO, IOApp}
 import com.leysoft.products.adapter.auth.Auth.{AuthService, InMemoryUserRepository}
-import com.leysoft.products.adapter.auth.LoginRoute
-import com.leysoft.products.adapter.in.api.ProductRoute
+import com.leysoft.products.adapter.in.api.{LoginRoute, ProductRoute}
 import com.leysoft.products.adapter.in.api.error.ErrorHandler
 import com.leysoft.products.adapter.out.redis.RedisProductRepository
 import com.leysoft.products.adapter.out.redis.config.RedisConfiguration
