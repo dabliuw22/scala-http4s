@@ -2,8 +2,7 @@ package com.leysoft
 
 import cats.effect.{ContextShift, ExitCode, Timer}
 import com.leysoft.products.adapter.auth.Auth.{AuthService, InMemoryUserRepository}
-import com.leysoft.products.adapter.auth.LoginRoute
-import com.leysoft.products.adapter.in.api.ProductRoute
+import com.leysoft.products.adapter.in.api.{LoginRoute, ProductRoute}
 import com.leysoft.products.adapter.in.api.error.ErrorHandler
 import com.leysoft.products.adapter.out.doobie.DoobieProductRepository
 import com.leysoft.products.adapter.out.doobie.config.DoobieConfiguration

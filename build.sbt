@@ -15,11 +15,14 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.13.1",
   scalacOptions := options,
   scalafmtOnCompile in ThisBuild := true,
+  autoCompilerPlugins in ThisBuild := true,
   assemblyMergeStrategy in assembly := {
     case PathList("META-INF", xs @ _*) => MergeStrategy.discard
     case _ => MergeStrategy.first
   }
 )
+
+addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
 
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
