@@ -9,10 +9,8 @@ import com.leysoft.products.adapter.out.skunk.config.SkunkConfiguration
 import com.leysoft.products.application.DefaultProductService
 import dev.profunktor.tracer.Tracer
 import natchez.Trace.Implicits.noop
-import eu.timepit.refined.auto._
-import io.chrisdavenport.log4cats.Logger
-import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.server.blaze.BlazeServerBuilder
+import org.http4s.server.middleware.CORS
 
 object ApiCats extends IOApp {
   import com.leysoft.products.adapter.config._
@@ -44,10 +42,13 @@ object ApiCats extends IOApp {
                   .bindHttp(port = conf.api.port.value,
                             host = conf.api.host.value)
                   .withHttpApp(
-                    Tracer[IO].loggingMiddleware(
-                      (api.routes(middleware, handler) <+> login
-                        .routes(handler) <+> traced.routes(handler)).orNotFound
-                    )
+                    Tracer[IO].loggingMiddleware {
+                      CORS {
+                        (api.routes(middleware, handler) <+> login
+                          .routes(handler) <+> traced
+                          .routes(handler)).orNotFound
+                      }
+                    }
                   )
                   .serve
                   .compile

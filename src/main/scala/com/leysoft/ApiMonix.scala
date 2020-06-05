@@ -11,6 +11,7 @@ import com.leysoft.products.application.DefaultProductService
 import monix.eval.{Task, TaskApp}
 import monix.execution.Scheduler
 import org.http4s.server.blaze.BlazeServerBuilder
+import org.http4s.server.middleware.CORS
 
 object ApiMonix extends TaskApp {
   import com.leysoft.products.adapter.config._
@@ -38,8 +39,10 @@ object ApiMonix extends TaskApp {
                 .bindHttp(port = conf.api.port.value,
                           host = conf.api.host.value)
                 .withHttpApp(
-                  (api.routes(middleware, handler) <+> login
-                    .routes(handler)).orNotFound
+                  CORS {
+                    (api.routes(middleware, handler) <+> login
+                      .routes(handler)).orNotFound
+                  }
                 )
                 .serve
                 .compile

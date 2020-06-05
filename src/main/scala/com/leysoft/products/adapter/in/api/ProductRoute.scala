@@ -1,6 +1,6 @@
 package com.leysoft.products.adapter.in.api
 
-import cats.effect.{Effect}
+import cats.effect.Effect
 import com.leysoft.products.adapter.auth.Auth.User
 import com.leysoft.products.domain.Product
 import com.leysoft.products.application.ProductService

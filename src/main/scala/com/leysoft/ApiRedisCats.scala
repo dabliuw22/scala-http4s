@@ -10,6 +10,7 @@ import com.leysoft.products.adapter.out.redis.util.DefaultRedisUtil
 import com.leysoft.products.application.DefaultProductService
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import org.http4s.server.blaze.BlazeServerBuilder
+import org.http4s.server.middleware.CORS
 
 object ApiRedisCats extends IOApp {
   import com.leysoft.products.adapter.config._
@@ -37,8 +38,10 @@ object ApiRedisCats extends IOApp {
                 .bindHttp(port = conf.api.port.value,
                           host = conf.api.host.value)
                 .withHttpApp(
-                  (api.routes(middleware, handler) <+> login
-                    .routes(handler)).orNotFound
+                  CORS {
+                    (api.routes(middleware, handler) <+> login
+                      .routes(handler)).orNotFound
+                  }
                 )
                 .serve
                 .compile
