@@ -17,7 +17,7 @@ object Dependencies {
   def doobie(artifact: String): ModuleID = "org.tpolecat" %% artifact % "0.8.6"
   def skunk(artifact: String): ModuleID = "org.tpolecat" %% artifact % "0.0.7"
   def redis4Cats(artifact: String): ModuleID = "dev.profunktor" %% artifact % "0.9.3"
-  def http4s(artifact: String): ModuleID = "org.http4s" %% artifact % "0.21.0-SNAPSHOT"
+  def http4s(artifact: String): ModuleID = "org.http4s" %% artifact % "0.21.3"
   def http4sJwtAuth(artifact: String) : ModuleID = "dev.profunktor" %% artifact % "0.0.4"
   def tracer(artifact: String) : ModuleID = "dev.profunktor" %% artifact % "1.5.3"
   def circe(artifact: String): ModuleID = "io.circe" %% artifact % "0.12.3"

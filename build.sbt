@@ -27,7 +27,6 @@ addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVers
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
   .settings(
-    resolvers += Resolver.sonatypeRepo("snapshots"),
     libraryDependencies ++= (dependencies ++ testDependencies),
     mainClass in assembly := Some("com.leysoft.ApiCats"),
     assemblyJarName in assembly := "api-cats.jar"

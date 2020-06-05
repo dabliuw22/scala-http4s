@@ -12,6 +12,8 @@ import natchez.Trace.Implicits.noop
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.server.middleware.CORS
 
+import scala.concurrent.ExecutionContext.global
+
 object ApiCats extends IOApp {
   import com.leysoft.products.adapter.config._
   import org.http4s.implicits._ // for orNotFound
@@ -38,7 +40,7 @@ object ApiCats extends IOApp {
             api <- ProductRoute.make[IO](service)
             traceService <- DefaultTracedService.make[IO]
             traced <- TracedRoute.make[IO](traceService)
-            _ <- BlazeServerBuilder[IO]
+            _ <- BlazeServerBuilder[IO](global)
                   .bindHttp(port = conf.api.port.value,
                             host = conf.api.host.value)
                   .withHttpApp(
