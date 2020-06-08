@@ -22,7 +22,6 @@ final class TracedRoute[F[_]: Effect: Tracer] private (
         .run(traceId)
         .flatMap(Ok(_))
         .handleErrorWith(errorHandler)
-
   }
 
   def routes(
