@@ -14,6 +14,8 @@ lazy val commonSettings = Seq(
   organization := "com.leysoft",
   scalaVersion := "2.13.1",
   scalacOptions := options,
+  scalaSource in Test := baseDirectory.value / "src/test/scala",
+  scalaSource in IntegrationTest := baseDirectory.value / "src/it/scala",
   scalafmtOnCompile in ThisBuild := true,
   autoCompilerPlugins in ThisBuild := true,
   assemblyMergeStrategy in assembly := {
@@ -26,8 +28,12 @@ addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVers
 
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
+  .configs(IntegrationTest)
+  .settings(inConfig(IntegrationTest)(Defaults.itSettings))
+  .configs(Test)
+  .settings(inConfig(Test)(Defaults.testSettings))
   .settings(
-    libraryDependencies ++= (dependencies ++ testDependencies),
+    libraryDependencies ++= (dependencies ++ testDependencies ++ itDependencies),
     mainClass in assembly := Some("com.leysoft.ApiCats"),
     assemblyJarName in assembly := "api-cats.jar"
   )

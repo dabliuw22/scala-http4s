@@ -68,4 +68,10 @@ object Dependencies {
     scalaCheckParent %% "scalacheck" % scalaCheckVersion % Test,
     scalaTestPlusParent %% "scalacheck-1-14" % scalaTestPlusVersion % Test
   )
+
+  val itDependencies = Seq(
+    scalaTestParent %% "scalatest" % scalaTestVersion % IntegrationTest,
+    scalaCheckParent %% "scalacheck" % scalaCheckVersion % IntegrationTest,
+    scalaTestPlusParent %% "scalacheck-1-14" % scalaTestPlusVersion % IntegrationTest
+  )
 }
