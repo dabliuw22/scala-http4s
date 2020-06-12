@@ -9,6 +9,8 @@ object Dependencies {
   lazy val scalaCheckVersion = "1.14.3"
   lazy val scalaTestPlusParent = "org.scalatestplus"
   lazy val scalaTestPlusVersion = "3.1.0.1"
+  lazy val scalaTestContainersParent = "com.dimafeng"
+  lazy val scalaTestContainersVersion = "0.37.0"
 
   def cats(artifact: String): ModuleID = "org.typelevel" %% artifact % "2.0.0"
   def refined(artifact: String): ModuleID = "eu.timepit" %% artifact % "0.9.13"
@@ -72,6 +74,8 @@ object Dependencies {
   val itDependencies = Seq(
     scalaTestParent %% "scalatest" % scalaTestVersion % IntegrationTest,
     scalaCheckParent %% "scalacheck" % scalaCheckVersion % IntegrationTest,
-    scalaTestPlusParent %% "scalacheck-1-14" % scalaTestPlusVersion % IntegrationTest
+    scalaTestPlusParent %% "scalacheck-1-14" % scalaTestPlusVersion % IntegrationTest,
+    scalaTestContainersParent %% "testcontainers-scala-scalatest" % scalaTestContainersVersion % IntegrationTest,
+    scalaTestContainersParent %% "testcontainers-scala-postgresql" % scalaTestContainersVersion % IntegrationTest
   )
 }

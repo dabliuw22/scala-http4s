@@ -8,7 +8,7 @@ import doobie.util.update.Update0
 import fs2.Stream
 import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 
-sealed trait DoobieUtil[P[_]] {
+trait DoobieUtil[P[_]] {
 
   def read[T](sqlStatement: Query0[T]): P[Option[T]]
 
