@@ -11,13 +11,7 @@ import org.scalatest.wordspec.AsyncWordSpec
 
 import scala.concurrent.ExecutionContext
 
-abstract class PostgresItSpec extends AsyncWordSpec with BeforeAndAfterAll with ForAllTestContainer {
-
-  private implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
-
-  private implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
-
-  private val blocker: Blocker = Blocker.liftExecutionContext(ExecutionContexts.synchronous)
+abstract class PostgresItSpec extends ContainerItSpec {
 
   override val container: PostgreSQLContainer = PostgreSQLContainer.Def(
     dockerImageName = "postgres:11.1",
