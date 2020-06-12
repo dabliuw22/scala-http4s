@@ -6,12 +6,12 @@ import com.leysoft.products.adapter.out.doobie.util.DoobieUtil
 import doobie.implicits._
 import doobie.util.{ExecutionContexts, query, update}
 import doobie.util.transactor.Transactor
-import org.scalatest.BeforeAndAfterEach
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.wordspec.AsyncWordSpec
 
 import scala.concurrent.ExecutionContext
 
-abstract class PostgresItSpec extends AsyncWordSpec with BeforeAndAfterEach with ForAllTestContainer {
+abstract class PostgresItSpec extends AsyncWordSpec with BeforeAndAfterAll with ForAllTestContainer {
 
   private implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
@@ -49,4 +49,8 @@ abstract class PostgresItSpec extends AsyncWordSpec with BeforeAndAfterEach with
   }
 
   def createTable(sqlStatement: update.Update0): IO[Unit] = sqlStatement.run.transact(transactor).void
+
+  override protected def beforeAll: Unit = container.start
+
+  override protected def afterAll: Unit = container.stop
 }

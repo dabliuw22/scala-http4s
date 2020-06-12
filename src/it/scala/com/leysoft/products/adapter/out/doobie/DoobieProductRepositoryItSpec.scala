@@ -25,8 +25,30 @@ final class DoobieProductRepositoryItSpec extends PostgresItSpec {
     }
   }
 
-  override protected def beforeEach(): Unit = {
-    container.start
+  "DoobieProductRepository.findBy" should {
+    "Return None Record" in {
+      val effect = for {
+        repo <- repository
+        result <- repo.findBy(UUID.randomUUID.toString)
+        status = result == None
+      } yield assert(status)
+      effect.unsafeToFuture
+    }
+  }
+
+  "DoobieProductRepository.findAll" should {
+    "Return One Record" in {
+      val effect = for {
+        repo <- repository
+        result <- repo.findAll
+        status = result == List(product)
+      } yield assert(status)
+      effect.unsafeToFuture
+    }
+  }
+
+  override protected def beforeAll: Unit = {
+    super.beforeAll
     createTable(
       sql"""CREATE TABLE products (
            |    id VARCHAR PRIMARY KEY,
@@ -36,6 +58,4 @@ final class DoobieProductRepositoryItSpec extends PostgresItSpec {
            |""".stripMargin.update
     ).unsafeRunSync
   }
-
-  override protected def afterEach(): Unit = container.stop
 }
