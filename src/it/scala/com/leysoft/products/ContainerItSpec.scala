@@ -8,11 +8,16 @@ import org.scalatest.wordspec.AsyncWordSpec
 
 import scala.concurrent.ExecutionContext
 
-trait ContainerItSpec extends AsyncWordSpec with BeforeAndAfterAll with ForAllTestContainer {
+trait ContainerItSpec
+    extends AsyncWordSpec
+    with BeforeAndAfterAll
+    with ForAllTestContainer {
 
-  protected implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
+  protected implicit def contextShift: ContextShift[IO] =
+    IO.contextShift(ExecutionContext.global)
 
-  protected implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
+  protected implicit def timer: Timer[IO] = IO.timer(ExecutionContext.global)
 
-  protected val blocker: Blocker = Blocker.liftExecutionContext(ExecutionContexts.synchronous)
+  protected def blocker: Blocker =
+    Blocker.liftExecutionContext(ExecutionContexts.synchronous)
 }

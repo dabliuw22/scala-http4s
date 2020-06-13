@@ -24,43 +24,44 @@ final class ProductRoute[P[_]: Effect] private (
 
   private def httpRoutes(
     errorHandler: PartialFunction[Throwable, P[Response[P]]]
-  ): AuthedRoutes[User, P] = AuthedRoutes.of {
-    case GET -> Root as user =>
-      productService.getAll
-        .map(_.asJson)
-        .flatMap(Ok(_))
-        .recoverWith(errorHandler)
-    case GET -> Root / "streams" as user =>
-      StreamArray
-        .make(productService.getAllStreams)
-        .flatMap(Ok(_))
-        .recoverWith(errorHandler)
-    case GET -> Root / UUIDVar(productId) as user =>
-      productService
-        .get(productId.toString)
-        .map(_.asJson)
-        .flatMap(Ok(_))
-        .handleErrorWith(errorHandler)
-    case request @ POST -> Root as user =>
-      request.req
-        .as[Product]
-        .flatMap(productService.create)
-        .flatMap(Created(_))
-        .handleErrorWith(errorHandler)
-    case request @ PUT -> Root / UUIDVar(productId) as user =>
-      request.req
-        .as[Product]
-        .map(product => product.copy(id = productId.toString))
-        .flatMap(productService.update)
-        .flatMap(Ok(_))
-        .handleErrorWith(errorHandler)
-    case DELETE -> Root / UUIDVar(productId) as user =>
-      productService
-        .remove(productId.toString)
-        .map(_.asJson)
-        .flatMap(Ok(_))
-        .handleErrorWith(errorHandler)
-  }
+  ): AuthedRoutes[User, P] =
+    AuthedRoutes.of {
+      case GET -> Root as user =>
+        productService.getAll
+          .map(_.asJson)
+          .flatMap(Ok(_))
+          .recoverWith(errorHandler)
+      case GET -> Root / "streams" as user =>
+        StreamArray
+          .make(productService.getAllStreams)
+          .flatMap(Ok(_))
+          .recoverWith(errorHandler)
+      case GET -> Root / UUIDVar(productId) as user =>
+        productService
+          .get(productId.toString)
+          .map(_.asJson)
+          .flatMap(Ok(_))
+          .handleErrorWith(errorHandler)
+      case request @ POST -> Root as user =>
+        request.req
+          .as[Product]
+          .flatMap(productService.create)
+          .flatMap(Created(_))
+          .handleErrorWith(errorHandler)
+      case request @ PUT -> Root / UUIDVar(productId) as user =>
+        request.req
+          .as[Product]
+          .map(product => product.copy(id = productId.toString))
+          .flatMap(productService.update)
+          .flatMap(Ok(_))
+          .handleErrorWith(errorHandler)
+      case DELETE -> Root / UUIDVar(productId) as user =>
+        productService
+          .remove(productId.toString)
+          .map(_.asJson)
+          .flatMap(Ok(_))
+          .handleErrorWith(errorHandler)
+    }
 
   def routes(
     auth: AuthMiddleware[P, User],

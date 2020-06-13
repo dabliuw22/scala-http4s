@@ -1,4 +1,5 @@
 import Dependencies._
+import ScalafmtPlugin._
 
 lazy val options =  Seq(
   "-feature",
@@ -30,6 +31,7 @@ lazy val root = (project in file("."))
   .settings(commonSettings: _*)
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings))
+  .settings(inConfig(IntegrationTest)(scalafmtConfigSettings))
   .configs(Test)
   .settings(inConfig(Test)(Defaults.testSettings))
   .settings(

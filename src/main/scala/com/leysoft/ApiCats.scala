@@ -41,20 +41,22 @@ object ApiCats extends IOApp {
             traceService <- DefaultTracedService.make[IO]
             traced <- TracedRoute.make[IO](traceService)
             _ <- BlazeServerBuilder[IO](global)
-                  .bindHttp(port = conf.api.port.value,
-                            host = conf.api.host.value)
-                  .withHttpApp(
-                    Tracer[IO].loggingMiddleware {
-                      CORS {
-                        (api.routes(middleware, handler) <+> login
-                          .routes(handler) <+> traced
-                          .routes(handler)).orNotFound
-                      }
-                    }
-                  )
-                  .serve
-                  .compile
-                  .drain
+                   .bindHttp(
+                     port = conf.api.port.value,
+                     host = conf.api.host.value
+                   )
+                   .withHttpApp(
+                     Tracer[IO].loggingMiddleware {
+                       CORS {
+                         (api.routes(middleware, handler) <+> login
+                           .routes(handler) <+> traced
+                           .routes(handler)).orNotFound
+                       }
+                     }
+                   )
+                   .serve
+                   .compile
+                   .drain
           } yield ExitCode.Success
         }
       }

@@ -92,7 +92,7 @@ object Auth {
                   .map(Option(_))
                   .handleError(_ => None)
               case _ => Sync[P].delay(None)
-        }
+            }
 
     val middleware: P[AuthMiddleware[P, User]] =
       Sync[P].delay(
@@ -115,12 +115,12 @@ object Auth {
       for {
         user <- authRepository.findBy(auth.username)
         claim <- if (user.password.equals(auth.password))
-                  Sync[P]
-                    .delay(
-                      JwtClaim(content = user.toUser.asJson.noSpaces).issuedNow
-                        .expiresIn(authConfig.expiration.toSeconds)
-                    )
-                else throw AuthUserException("Invalid Credentials")
+                   Sync[P]
+                     .delay(
+                       JwtClaim(content = user.toUser.asJson.noSpaces).issuedNow
+                         .expiresIn(authConfig.expiration.toSeconds)
+                     )
+                 else throw AuthUserException("Invalid Credentials")
         token <- jwtEncode[P](claim, secretKey, algorithm)
       } yield token
   }

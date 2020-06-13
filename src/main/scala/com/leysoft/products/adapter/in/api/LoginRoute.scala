@@ -19,14 +19,15 @@ final class LoginRoute[P[_]: Effect] private (auth: AuthService[P])
 
   private def httpRoutes(
     errorHandler: PartialFunction[Throwable, P[Response[P]]]
-  ): HttpRoutes[P] = HttpRoutes.of[P] {
-    case request @ POST -> Root =>
-      request
-        .as[AuthUser]
-        .flatMap(auth.create)
-        .flatMap(Ok(_))
-        .handleErrorWith(errorHandler)
-  }
+  ): HttpRoutes[P] =
+    HttpRoutes.of[P] {
+      case request @ POST -> Root =>
+        request
+          .as[AuthUser]
+          .flatMap(auth.create)
+          .flatMap(Ok(_))
+          .handleErrorWith(errorHandler)
+    }
 
   def routes(
     errorHandler: PartialFunction[Throwable, P[Response[P]]]

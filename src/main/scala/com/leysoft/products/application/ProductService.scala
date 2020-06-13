@@ -79,10 +79,11 @@ final class DefaultProductService[P[_]: Effect: MonadThrow](
       }
       .adaptError(e => ProductWritingException(e.getMessage))
 
-  private def validate[A](count: Int, message: String, a: A): A = count match {
-    case 0 => throw ProductWritingException(message)
-    case _ => a
-  }
+  private def validate[A](count: Int, message: String, a: A): A =
+    count match {
+      case 0 => throw ProductWritingException(message)
+      case _ => a
+    }
 }
 
 object DefaultProductService {

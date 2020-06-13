@@ -7,8 +7,8 @@ import fs2.Stream
 import skunk.Session
 import skunk.data.Completion
 
-final class SkunkProductRepository[P[_]: Effect] private (
-  implicit session: Session[P]
+final class SkunkProductRepository[P[_]: Effect] private (implicit
+  session: Session[P]
 ) extends ProductRepository[P] {
   import SkunkProductRepository._
   import cats.syntax.functor._
@@ -63,8 +63,8 @@ object SkunkProductRepository {
   import skunk.implicits._
   import skunk.codec.all._
 
-  def make[P[_]: Effect](
-    implicit session: Session[P]
+  def make[P[_]: Effect](implicit
+    session: Session[P]
   ): P[SkunkProductRepository[P]] =
     Effect[P].delay(new SkunkProductRepository)
 

@@ -16,13 +16,14 @@ final class TracedRoute[F[_]: Effect: Tracer] private (
 
   private def httpRoutes(
     errorHandler: PartialFunction[Throwable, F[Response[F]]]
-  ): HttpRoutes[F] = TracedHttpRoute[F] {
-    case GET -> Root using traceId =>
-      trace.trace
-        .run(traceId)
-        .flatMap(Ok(_))
-        .handleErrorWith(errorHandler)
-  }
+  ): HttpRoutes[F] =
+    TracedHttpRoute[F] {
+      case GET -> Root using traceId =>
+        trace.trace
+          .run(traceId)
+          .flatMap(Ok(_))
+          .handleErrorWith(errorHandler)
+    }
 
   def routes(
     errorHandler: PartialFunction[Throwable, F[Response[F]]]
@@ -43,8 +44,8 @@ trait TracedService[F[_]] {
   def trace: F[Unit]
 }
 
-final class DefaultTracedService[F[_]: Effect] private (
-  implicit val L: TracerLog[Trace[F, *]]
+final class DefaultTracedService[F[_]: Effect] private (implicit
+  val L: TracerLog[Trace[F, *]]
 ) extends TracedService[Trace[F, *]] {
 
   override def trace: Trace[F, Unit] =
@@ -54,8 +55,8 @@ final class DefaultTracedService[F[_]: Effect] private (
 
 object DefaultTracedService {
 
-  def make[F[_]: Effect](
-    implicit L: TracerLog[Trace[F, *]]
+  def make[F[_]: Effect](implicit
+    L: TracerLog[Trace[F, *]]
   ): F[TracedService[Trace[F, *]]] =
     Effect[F].delay(new DefaultTracedService[F])
 }

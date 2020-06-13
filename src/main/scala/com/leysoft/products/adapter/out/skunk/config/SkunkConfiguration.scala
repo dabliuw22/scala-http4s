@@ -9,7 +9,9 @@ import eu.timepit.refined.types.string.NonEmptyString
 import natchez.Trace
 import skunk.{Session, SessionPool}
 
-final case class SkunkConfiguration[P[_]: ConcurrentEffect: ContextShift: Trace]() {
+final case class SkunkConfiguration[
+  P[_]: ConcurrentEffect: ContextShift: Trace
+]() {
 
   private val host: NonEmptyString = "localhost"
 

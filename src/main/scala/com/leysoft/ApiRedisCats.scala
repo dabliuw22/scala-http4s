@@ -34,18 +34,18 @@ object ApiRedisCats extends IOApp {
           middleware <- auth.middleware
           login <- LoginRoute.make[IO](auth)
           api <- ProductRoute.make[IO](service)
-          _ <- BlazeServerBuilder[IO]
-                .bindHttp(port = conf.api.port.value,
-                          host = conf.api.host.value)
-                .withHttpApp(
-                  CORS {
-                    (api.routes(middleware, handler) <+> login
-                      .routes(handler)).orNotFound
-                  }
-                )
-                .serve
-                .compile
-                .drain
+          _ <-
+            BlazeServerBuilder[IO]
+              .bindHttp(port = conf.api.port.value, host = conf.api.host.value)
+              .withHttpApp(
+                CORS {
+                  (api.routes(middleware, handler) <+> login
+                    .routes(handler)).orNotFound
+                }
+              )
+              .serve
+              .compile
+              .drain
         } yield ExitCode.Success
       }
 }

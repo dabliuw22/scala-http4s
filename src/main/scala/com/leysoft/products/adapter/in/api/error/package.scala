@@ -23,24 +23,25 @@ package object error {
     private val logger =
       Slf4jLogger.getLoggerFromClass[P](ErrorHandler.getClass)
 
-    def handler: P[ExceptionHandler] = Async[P].delay {
-      case error: ProductNotFoundException =>
-        logger.error(s"Error: ${error.getMessage}") *> NotFound(
-          ErrorResponse(error.getMessage)
-        )
-      case error: ProductWritingException =>
-        logger.error(s"Error: ${error.getMessage}") *> Conflict(
-          ErrorResponse(error.getMessage)
-        )
-      case error: AuthUserException =>
-        logger.error(s"Error: ${error.getMessage}") *> Forbidden(
-          ErrorResponse(error.getMessage)
-        )
-      case error =>
-        logger.error(s"Error: ${error.getMessage}") *> InternalServerError(
-          ErrorResponse(error.getMessage)
-        )
-    }
+    def handler: P[ExceptionHandler] =
+      Async[P].delay {
+        case error: ProductNotFoundException =>
+          logger.error(s"Error: ${error.getMessage}") *> NotFound(
+            ErrorResponse(error.getMessage)
+          )
+        case error: ProductWritingException =>
+          logger.error(s"Error: ${error.getMessage}") *> Conflict(
+            ErrorResponse(error.getMessage)
+          )
+        case error: AuthUserException =>
+          logger.error(s"Error: ${error.getMessage}") *> Forbidden(
+            ErrorResponse(error.getMessage)
+          )
+        case error =>
+          logger.error(s"Error: ${error.getMessage}") *> InternalServerError(
+            ErrorResponse(error.getMessage)
+          )
+      }
   }
 
   object ErrorHandler {

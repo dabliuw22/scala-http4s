@@ -35,18 +35,18 @@ object ApiMonix extends TaskApp {
           middleware <- auth.middleware
           login <- LoginRoute.make[Task](auth)
           api <- ProductRoute.make[Task](service)
-          _ <- BlazeServerBuilder[Task]
-                .bindHttp(port = conf.api.port.value,
-                          host = conf.api.host.value)
-                .withHttpApp(
-                  CORS {
-                    (api.routes(middleware, handler) <+> login
-                      .routes(handler)).orNotFound
-                  }
-                )
-                .serve
-                .compile
-                .drain
+          _ <-
+            BlazeServerBuilder[Task]
+              .bindHttp(port = conf.api.port.value, host = conf.api.host.value)
+              .withHttpApp(
+                CORS {
+                  (api.routes(middleware, handler) <+> login
+                    .routes(handler)).orNotFound
+                }
+              )
+              .serve
+              .compile
+              .drain
         } yield ExitCode.Success
       }
 }

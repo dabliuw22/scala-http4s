@@ -19,8 +19,8 @@ trait DoobieUtil[P[_]] {
   def write(sqlStatement: Update0): P[Int]
 }
 
-final class HikariDoobieUtil[P[_]: Async: ContextShift] private (
-  implicit transactor: HikariTransactor[P]
+final class HikariDoobieUtil[P[_]: Async: ContextShift] private (implicit
+  transactor: HikariTransactor[P]
 ) extends DoobieUtil[P] {
   import cats.syntax.apply._
 
@@ -37,7 +37,9 @@ final class HikariDoobieUtil[P[_]: Async: ContextShift] private (
     sqlStatement.stream.transact(transactor)
 
   override def readList[T](sqlStatement: Query0[T]): P[List[T]] = {
-    logger.info(s"READ_LIST: ${sqlStatement.sql}") *> sqlStatement.stream.compile.toList
+    logger.info(
+      s"READ_LIST: ${sqlStatement.sql}"
+    ) *> sqlStatement.stream.compile.toList
       .transact(transactor)
   }
 
@@ -50,8 +52,8 @@ final class HikariDoobieUtil[P[_]: Async: ContextShift] private (
 
 object HikariDoobieUtil {
 
-  def make[P[_]: Async: ContextShift](
-    implicit transactor: HikariTransactor[P]
+  def make[P[_]: Async: ContextShift](implicit
+    transactor: HikariTransactor[P]
   ): P[HikariDoobieUtil[P]] =
     Async[P].delay(new HikariDoobieUtil[P])
 }

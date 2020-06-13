@@ -24,12 +24,12 @@ final case class DoobieConfiguration[P[_]: Async: ContextShift]() {
     context <- ExecutionContexts.fixedThreadPool[P](threadSize)
     blocker <- Blocker[P]
     hikari <- HikariTransactor.newHikariTransactor[P](
-               driverClassName = driver,
-               url = url,
-               user = user,
-               pass = password,
-               connectEC = context,
-               blocker = blocker
-             )
+                driverClassName = driver,
+                url = url,
+                user = user,
+                pass = password,
+                connectEC = context,
+                blocker = blocker
+              )
   } yield hikari
 }

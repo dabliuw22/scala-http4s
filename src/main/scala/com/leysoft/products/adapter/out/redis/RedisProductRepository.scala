@@ -21,9 +21,7 @@ final class RedisProductRepository[P[_]: Effect] private (
   override def findAll: P[List[domain.Product]] = Effect[P].delay(List())
 
   override def findAllAStreams: fs2.Stream[P, domain.Product] =
-    fs2.Stream
-      .eval(Effect[P].delay(List[domain.Product]()))
-      .flatMap(list => fs2.Stream.emits(list))
+    fs2.Stream.emits(List[domain.Product]()).covary[P]
 
   override def save(product: domain.Product): P[Int] =
     redisUtil
@@ -53,24 +51,22 @@ object RedisProductRepository {
   private val fa: Map[String, String] => Option[domain.Product] = hash =>
     hash
       .get(idField)
-      .flatMap(
-        id =>
-          hash
-            .get(nameField)
-            .flatMap(
-              name =>
-                hash
-                  .get(stockName)
-                  .map(stock => domain.Product(id, name, stock.toDouble))
+      .flatMap(id =>
+        hash
+          .get(nameField)
+          .flatMap(name =>
+            hash
+              .get(stockName)
+              .map(stock => domain.Product(id, name, stock.toDouble))
           )
-    )
+      )
 
   private val fb: domain.Product => Map[String, String] = product =>
     Map(
       idField -> product.id,
       nameField -> product.name,
       stockName -> product.stock.toString
-  )
+    )
 
   def make[P[_]: Effect](
     commands: RedisUtil[P]

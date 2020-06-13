@@ -37,9 +37,11 @@ package object config {
 
   type AuthExpirationSeconds = FiniteDuration
 
-  final case class AuthConfiguration(secretKey: Secret[AuthSecretKey],
-                                     algorithm: AuthAlgorithm,
-                                     expiration: AuthExpirationSeconds)
+  final case class AuthConfiguration(
+    secretKey: Secret[AuthSecretKey],
+    algorithm: AuthAlgorithm,
+    expiration: AuthExpirationSeconds
+  )
 
   type DatabasePassword = String Refined MinSize[W.`5`.T]
 
@@ -61,33 +63,35 @@ package object config {
   )
 
   val apiConfig: ConfigValue[ApiConfiguration] =
-    (env("API_HOST").as[NonEmptyString].default("localhost"),
-     env("API_PORT").as[UserPortNumber].default(8080))
-      .parMapN { (host, port) =>
-        ApiConfiguration(host, port)
-      }
+    (
+      env("API_HOST").as[NonEmptyString].default("localhost"),
+      env("API_PORT").as[UserPortNumber].default(8080)
+    ).parMapN { (host, port) =>
+      ApiConfiguration(host, port)
+    }
 
   val databaseConfig: ConfigValue[DatabaseConfiguration] =
-    (env("DB_USER").as[NonEmptyString].default("http4s"),
-     env("DB_PASSWORD").as[DatabasePassword].default("http4s").secret)
-      .parMapN { (user, password) =>
-        DatabaseConfiguration(user, password)
-      }
+    (
+      env("DB_USER").as[NonEmptyString].default("http4s"),
+      env("DB_PASSWORD").as[DatabasePassword].default("http4s").secret
+    ).parMapN { (user, password) =>
+      DatabaseConfiguration(user, password)
+    }
 
   val authConfig: ConfigValue[AuthConfiguration] =
-    (env("AUTH_SECRET_KEY")
-       .as[AuthSecretKey]
-       .default("shg4k58shdgfb3dbdn9024")
-       .secret,
-     env("AUTH_ALGORITHM").as[AuthAlgorithm].default("HS512"),
-     env("AUTH_EXPIRATION_SECONDS")
-       .as[PosInt]
-       .default(600)
-       .map(s => FiniteDuration.apply(s.value, SECONDS)))
-      .parMapN(
-        (secretKey, algorithm, expiration) =>
-          AuthConfiguration(secretKey, algorithm, expiration)
-      )
+    (
+      env("AUTH_SECRET_KEY")
+        .as[AuthSecretKey]
+        .default("shg4k58shdgfb3dbdn9024")
+        .secret,
+      env("AUTH_ALGORITHM").as[AuthAlgorithm].default("HS512"),
+      env("AUTH_EXPIRATION_SECONDS")
+        .as[PosInt]
+        .default(600)
+        .map(s => FiniteDuration.apply(s.value, SECONDS))
+    ).parMapN((secretKey, algorithm, expiration) =>
+      AuthConfiguration(secretKey, algorithm, expiration)
+    )
 
   val config: ConfigValue[Configuration] =
     env("API_ENV")
