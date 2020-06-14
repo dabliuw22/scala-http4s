@@ -9,6 +9,8 @@ object Dependencies {
   lazy val scalaCheckVersion = "1.14.3"
   lazy val scalaTestPlusParent = "org.scalatestplus"
   lazy val scalaTestPlusVersion = "3.1.0.1"
+  lazy val testContainersParent = "org.testcontainers"
+  lazy val testContainersVersion = "1.14.3"
   lazy val scalaTestContainersParent = "com.dimafeng"
   lazy val scalaTestContainersVersion = "0.37.0"
 
@@ -75,6 +77,8 @@ object Dependencies {
     scalaTestParent %% "scalatest" % scalaTestVersion % IntegrationTest,
     scalaCheckParent %% "scalacheck" % scalaCheckVersion % IntegrationTest,
     scalaTestPlusParent %% "scalacheck-1-14" % scalaTestPlusVersion % IntegrationTest,
+    // testContainersParent % "testcontainers" % testContainersVersion % IntegrationTest,
+    // testContainersParent % "postgresql" % testContainersVersion % IntegrationTest
     scalaTestContainersParent %% "testcontainers-scala-scalatest" % scalaTestContainersVersion % IntegrationTest,
     scalaTestContainersParent %% "testcontainers-scala-postgresql" % scalaTestContainersVersion % IntegrationTest
   )
