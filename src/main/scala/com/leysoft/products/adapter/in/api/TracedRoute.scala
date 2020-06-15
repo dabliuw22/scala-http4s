@@ -3,7 +3,7 @@ package com.leysoft.products.adapter.in.api
 import cats.effect.Effect
 import cats.syntax.all._
 import dev.profunktor.tracer.Trace.Trace
-import dev.profunktor.tracer.{Http4sTracerDsl, TracedHttpRoute, Tracer, TracerLog}
+import dev.profunktor.tracer.{Http4sTracerDsl, Trace, TracedHttpRoute, Tracer, TracerLog}
 import org.http4s.server.Router
 import org.http4s.{HttpRoutes, Response}
 
@@ -44,19 +44,45 @@ trait TracedService[F[_]] {
   def trace: F[Unit]
 }
 
-final class DefaultTracedService[F[_]: Effect] private (implicit
+final class DefaultTracedService[F[_]: Effect] private (
+  repository: TracedRepository[Trace[F, *]]
+)(implicit
   val L: TracerLog[Trace[F, *]]
 ) extends TracedService[Trace[F, *]] {
 
   override def trace: Trace[F, Unit] =
     L.info[DefaultTracedService[F]]("Init") *>
-      L.info[DefaultTracedService[F]]("End")
+      repository.get("ID") *> L.info[DefaultTracedService[F]]("End")
 }
 
 object DefaultTracedService {
 
-  def make[F[_]: Effect](implicit
+  def make[F[_]: Effect](repository: TracedRepository[Trace[F, *]])(implicit
     L: TracerLog[Trace[F, *]]
   ): F[TracedService[Trace[F, *]]] =
-    Effect[F].delay(new DefaultTracedService[F])
+    Effect[F].delay(new DefaultTracedService[F](repository))
+}
+
+trait TracedRepository[F[_]] {
+
+  def get(id: String): F[String]
+}
+
+final class DefaultTracedRepository[F[_]: Effect] private (implicit
+  val L: TracerLog[Trace[F, *]]
+) extends TracedRepository[Trace[F, *]] {
+
+  override def get(id: String): Trace[F, String] =
+    L.info[DefaultTracedRepository[F]]("Init") *>
+      Trace(_ => Effect[F].delay(id)) <* L.info[DefaultTracedRepository[F]](
+      "End"
+    )
+}
+
+object DefaultTracedRepository {
+
+  def make[F[_]: Effect](implicit
+    L: TracerLog[Trace[F, *]]
+  ): F[TracedRepository[Trace[F, *]]] =
+    Effect[F].delay(new DefaultTracedRepository[F])
 }

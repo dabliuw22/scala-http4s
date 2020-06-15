@@ -2,7 +2,7 @@ package com.leysoft
 
 import cats.effect.{ExitCode, IO, IOApp}
 import com.leysoft.products.adapter.auth.Auth.{AuthService, InMemoryUserRepository}
-import com.leysoft.products.adapter.in.api.{DefaultTracedService, LoginRoute, ProductRoute, TracedRoute}
+import com.leysoft.products.adapter.in.api.{DefaultTracedRepository, DefaultTracedService, LoginRoute, ProductRoute, TracedRoute}
 import com.leysoft.products.adapter.in.api.error.ErrorHandler
 import com.leysoft.products.adapter.out.skunk.SkunkProductRepository
 import com.leysoft.products.adapter.out.skunk.config.SkunkConfiguration
@@ -38,7 +38,8 @@ object ApiCats extends IOApp {
             middleware <- auth.middleware
             login <- LoginRoute.make[IO](auth)
             api <- ProductRoute.make[IO](service)
-            traceService <- DefaultTracedService.make[IO]
+            traceRepository <- DefaultTracedRepository.make[IO]
+            traceService <- DefaultTracedService.make[IO](traceRepository)
             traced <- TracedRoute.make[IO](traceService)
             _ <- BlazeServerBuilder[IO](global)
                    .bindHttp(
