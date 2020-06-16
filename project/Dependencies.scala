@@ -61,7 +61,7 @@ object Dependencies {
     ciris("ciris-refined"),
     scalaLog("scala-logging"),
     logback("logback-classic"),
-    logbackEncoder("logstash-logback-encoder"),
+    logbackEncoder("logstash-logback-encoder"), // for jsonFile
     log4cats("log4cats-core"),
     log4cats("log4cats-slf4j")
   )

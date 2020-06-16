@@ -7,6 +7,14 @@
             </pattern>
         </encoder>
     </appender>
+    <appender name="jsonFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/logs.json</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/logs-%d{yyyy-MM-dd}.gz</fileNamePattern>
+            <maxHistory>10</maxHistory>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+    </appender>
     <logger name="ch.qos.logback" level="WARN"/>
     <logger name="com.zaxxer.hikari" level="INFO"/>
     <logger name="io.lettuce.core" level="INFO"/>
@@ -14,5 +22,6 @@
     <logger name="org.http4s" level="INFO"/>
     <root level="all">
         <appender-ref ref="stdOut"/>
+        <appender-ref ref="jsonFile"/>
     </root>
 </configuration>
