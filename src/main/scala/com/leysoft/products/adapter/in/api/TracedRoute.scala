@@ -29,10 +29,10 @@ final class TracedRoute[F[_]: Effect: Timer: Tracer] private (
         import scala.concurrent.duration._
         val toClient: fs2.Stream[F, WebSocketFrame] = fs2.Stream
           .awakeEvery[F](1 seconds)
-          .evalMap(i =>
+          .evalMap { i =>
             Trace(_ => Effect[F].delay(WebSocketFrame.Text(i.toString)))
               .run(traceId)
-          )
+          }
         val fromClient: fs2.Pipe[F, WebSocketFrame, Unit] = _.evalMap {
           case WebSocketFrame.Text(str, _) =>
             L.info[TracedRoute[F]](str).run(traceId)
