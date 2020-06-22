@@ -62,3 +62,9 @@ Requirements:
         --header 'Content-Type: application/json' \
         --header 'Authorization: Bearer ${YOUR_ACCESS_TOKEN}'
         ```
+    * Trace:
+        ```
+        curl --location --request GET 'http://localhost:8080/trace'
+        ```
+    * Websocket:
+        Add `ws://127.0.0.1:8080/trace/websocket` to [Websocket Client](https://www.websocket.org/echo.html)
