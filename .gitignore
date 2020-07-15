@@ -21,3 +21,4 @@ TAGS
 *.sublime-workspace
 tests.iml
 .DS_Store
+config/
