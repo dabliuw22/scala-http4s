@@ -13,6 +13,11 @@ Requirements:
     `docker-compose up -d`
 
 2. Run App.
+    * Run Migration: `sbt flywayMigrate`
+    * Compile: `sbt compile run`
+    * Assembly: `sbt assembly`
+    * Test: `sbt test`
+    * Integration Test: `sbt it:test`
 
 3. Test with cURL:
     * Login:

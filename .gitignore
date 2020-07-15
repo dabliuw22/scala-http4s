@@ -1,5 +1,23 @@
+project/boot
 target/
 logs/
-
-# For IntellIj
-.idea/
+.ensime
+.ensime_lucene
+.ensime_cache
+.ensime_snapshot
+ensime.sbt
+TAGS
+\#*#
+*~
+.#*
+.lib
+.history
+.*.swp
+.idea
+.idea/*
+.idea_modules
+.sbtrc
+*.sublime-project
+*.sublime-workspace
+tests.iml
+.DS_Store
