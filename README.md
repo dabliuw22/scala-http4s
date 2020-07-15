@@ -1,7 +1,7 @@
 # Http4s API
 
 In this project an API rest with `http4s`, `cats`, `doobie`, `skunk` was created. 
-Using **Type-Classes**.
+Using **Type-Classes** and **Tagless Final**.
 
 Requirements:
    * JDK >= 1.8
