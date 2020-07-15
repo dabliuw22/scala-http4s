@@ -2,10 +2,6 @@ import Dependencies._
 
 enablePlugins(FlywayPlugin)
 
-lazy val userPg = sys.env.getOrElse("DB_USER", "http4s")
-lazy val passPg = sys.env.getOrElse("DB_PASSWORD", "http4s")
-lazy val urlPg = sys.env.getOrElse("DB_URL", "jdbc:postgresql://localhost:5432/http4s_db")
-
 lazy val options =  Seq(
   "-feature",
   "-deprecation",
@@ -43,8 +39,8 @@ lazy val root = (project in file("."))
     libraryDependencies ++= (dependencies ++ testDependencies ++ itDependencies),
     mainClass in assembly := Some("com.leysoft.ApiCats"),
     assemblyJarName in assembly := "api-cats.jar",
-    flywayUrl := urlPg,
-    flywayUser := userPg,
-    flywayPassword := passPg,
+    flywayUrl := sys.env.getOrElse("DB_URL", "jdbc:postgresql://localhost:5432/http4s_db"),
+    flywayUser := sys.env.getOrElse("DB_USER", "http4s"),
+    flywayPassword := sys.env.getOrElse("DB_PASSWORD", "http4s"),
     flywayLocations += "db/migration"
   )
