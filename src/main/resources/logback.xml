@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <property scope="context" name="service_name" value="scla-http4s"/>
     <appender name="stdOut" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <pattern>
-                %highlight([%level]) [%date{HH:mm:ss.SSS}] %magenta([%thread]) [%logger] %message %n%throwable
+                %highlight([%level]) [%date{HH:mm:ss.SSS}] [${service_name}] %magenta([%thread]) [%logger] %message %n%throwable
             </pattern>
         </encoder>
     </appender>
