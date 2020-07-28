@@ -2,7 +2,7 @@ import Dependencies._
 
 enablePlugins(FlywayPlugin)
 
-lazy val options =  Seq(
+lazy val options = Seq(
   "-feature",
   "-deprecation",
   "-unchecked",
@@ -22,11 +22,13 @@ lazy val commonSettings = Seq(
   autoCompilerPlugins in ThisBuild := true,
   assemblyMergeStrategy in assembly := {
     case PathList("META-INF", xs @ _*) => MergeStrategy.discard
-    case _ => MergeStrategy.first
+    case _                             => MergeStrategy.first
   }
 )
 
-addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
+addCompilerPlugin(
+  "org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full
+)
 
 lazy val root = (project in file("."))
   .settings(commonSettings: _*)
@@ -39,7 +41,8 @@ lazy val root = (project in file("."))
     libraryDependencies ++= (dependencies ++ testDependencies ++ itDependencies),
     mainClass in assembly := Some("com.leysoft.ApiCats"),
     assemblyJarName in assembly := "api-cats.jar",
-    flywayUrl := sys.env.getOrElse("DB_URL", "jdbc:postgresql://localhost:5432/http4s_db"),
+    flywayUrl := sys.env
+      .getOrElse("DB_URL", "jdbc:postgresql://localhost:5432/http4s_db"),
     flywayUser := sys.env.getOrElse("DB_USER", "http4s"),
     flywayPassword := sys.env.getOrElse("DB_PASSWORD", "http4s"),
     flywayLocations += "db/migration"
