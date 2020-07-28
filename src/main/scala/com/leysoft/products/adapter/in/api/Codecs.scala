@@ -14,13 +14,15 @@ object Codecs {
 
   private val STOCK = "stock"
 
+  private val CREATED_AT = "created_at"
+
   implicit val productDecoder: Decoder[domain.Product] =
     // Decoder.forProduct2(NAME, STOCK)(domain.Product.apply)
     Decoder.instance[domain.Product] { cursor =>
       for {
         name <- cursor.downField(NAME).as[String]
         stock <- cursor.downField(STOCK).as[Double]
-      } yield domain.Product(name, stock)
+      } yield domain.Product.make(name, stock)
     }
 
   implicit val productEncoder: Encoder[domain.Product] =
@@ -29,7 +31,8 @@ object Codecs {
       Json.obj(
         (ID, Json.fromString(p.id)),
         (NAME, Json.fromString(p.name)),
-        (STOCK, Json.fromDoubleOrString(p.stock))
+        (STOCK, Json.fromDoubleOrString(p.stock)),
+        (CREATED_AT, Json.fromString(p.createdAt.toString))
       )
     }
 

@@ -1,6 +1,6 @@
 package com.leysoft.products.adapter.out.doobie
 
-import cats.effect.{Async, Effect}
+import cats.effect.Effect
 import com.leysoft.products.adapter.out.doobie.util.DoobieUtil
 import com.leysoft.products.domain.{Product, ProductRepository}
 
@@ -8,6 +8,7 @@ final class DoobieProductRepository[P[_]: Effect] private (
   doobieUtil: DoobieUtil[P]
 ) extends ProductRepository[P] {
   import doobie.implicits._
+  import doobie.implicits.javatime._
 
   override def findBy(id: String): P[Option[Product]] =
     doobieUtil
@@ -24,7 +25,8 @@ final class DoobieProductRepository[P[_]: Effect] private (
   override def save(product: Product): P[Int] =
     doobieUtil
       .write(
-        sql"INSERT INTO products VALUES(${product.id}, ${product.name}, ${product.stock})".update
+        sql"""INSERT INTO products
+               VALUES(${product.id}, ${product.name}, ${product.stock}, ${product.createdAt})""".update
       )
 
   override def update(product: Product): P[Int] =
