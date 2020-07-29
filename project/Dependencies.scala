@@ -15,6 +15,7 @@ object Dependencies {
   lazy val scalaTestContainersVersion = "0.37.0"
 
   def cats(artifact: String): ModuleID = "org.typelevel" %% artifact % "2.0.0"
+  def simulacrum(artifact: String): ModuleID = "org.typelevel" %% artifact % "1.0.0"
   def refined(artifact: String): ModuleID = "eu.timepit" %% artifact % "0.9.13"
   def monix(artifact: String): ModuleID = "io.monix" %% artifact % "3.1.0"
   def fs2(artifact: String): ModuleID = "co.fs2" %% artifact % "2.2.1"
@@ -43,6 +44,7 @@ object Dependencies {
     cats("cats-kernel"),
     cats("cats-core"),
     cats("cats-effect"),
+    simulacrum("simulacrum"),
     refined("refined"),
     refined("refined-cats"),
     monix("monix-eval"),
