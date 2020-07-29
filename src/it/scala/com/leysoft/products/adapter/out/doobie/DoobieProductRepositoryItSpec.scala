@@ -12,7 +12,7 @@ final class DoobieProductRepositoryItSpec extends PostgresItSpec {
   val product: Product = Product("test_product", 10)
 
   val repository: IO[ProductRepository[IO]] =
-    DoobieProductRepository.make[IO](util)
+    DoobieProductRepository.make[IO]
 
   "DoobieProductRepository.findBy" should {
     "Return One Record" in {
