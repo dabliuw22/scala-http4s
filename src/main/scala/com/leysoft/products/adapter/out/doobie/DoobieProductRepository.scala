@@ -1,48 +1,46 @@
 package com.leysoft.products.adapter.out.doobie
 
 import cats.effect.Effect
-import com.leysoft.products.adapter.out.doobie.util.DoobieUtil
+import com.leysoft.products.adapter.out.doobie.util.Doobie
 import com.leysoft.products.domain.{Product, ProductRepository}
 
-final class DoobieProductRepository[P[_]: Effect] private (
-  doobieUtil: DoobieUtil[P]
+final class DoobieProductRepository[P[_]: Effect: Doobie] private (
 ) extends ProductRepository[P] {
   import doobie.implicits._
   import doobie.implicits.javatime._
 
   override def findBy(id: String): P[Option[Product]] =
-    doobieUtil
-      .read(sql"SELECT * FROM products WHERE id = $id".query[Product])
+    Doobie[P]
+      .option(sql"SELECT * FROM products WHERE id = $id".query[Product])
 
   override def findAll: P[List[Product]] =
-    doobieUtil
-      .readList(sql"SELECT * FROM products".query[Product])
+    Doobie[P]
+      .list(sql"SELECT * FROM products".query[Product])
 
   override def findAllAStreams: fs2.Stream[P, Product] =
-    doobieUtil
-      .readStreams(sql"SELECT * FROM products".query[Product])
+    Doobie[P]
+      .stream(sql"SELECT * FROM products".query[Product])
 
   override def save(product: Product): P[Int] =
-    doobieUtil
-      .write(
-        sql"""INSERT INTO products
-               VALUES(${product.id}, ${product.name}, ${product.stock}, ${product.createdAt})""".update
+    Doobie[P]
+      .command(
+        sql"INSERT INTO products VALUES(${product.id}, ${product.name}, ${product.stock})".update
       )
 
   override def update(product: Product): P[Int] =
-    doobieUtil
-      .write(
+    Doobie[P]
+      .command(
         sql"""UPDATE products SET name = ${product.name}, stock = ${product.stock}
                  WHERE id = ${product.id}""".update
       )
 
   override def delete(id: String): P[Int] =
-    doobieUtil
-      .write(sql"DELETE FROM products WHERE id = $id".update)
+    Doobie[P]
+      .command(sql"DELETE FROM products WHERE id = $id".update)
 }
 
 object DoobieProductRepository {
 
-  def make[P[_]: Effect](dbUtil: DoobieUtil[P]): P[DoobieProductRepository[P]] =
-    Effect[P].delay(new DoobieProductRepository[P](dbUtil))
+  def make[P[_]: Effect: Doobie]: P[DoobieProductRepository[P]] =
+    Effect[P].delay(new DoobieProductRepository[P])
 }

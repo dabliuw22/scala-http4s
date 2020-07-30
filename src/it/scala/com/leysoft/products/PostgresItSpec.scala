@@ -2,9 +2,10 @@ package com.leysoft.products
 
 import cats.effect.IO
 import com.dimafeng.testcontainers.PostgreSQLContainer
-import com.leysoft.products.adapter.out.doobie.util.DoobieUtil
+import com.leysoft.products.adapter.out.doobie.util.Doobie
 import doobie.implicits._
-import doobie.util.{query, update}
+import doobie.util.query.Query0
+import doobie.util.update.Update0
 import doobie.util.transactor.Transactor
 
 abstract class PostgresItSpec extends ContainerItSpec {
@@ -27,25 +28,25 @@ abstract class PostgresItSpec extends ContainerItSpec {
       blocker = blocker
     )
 
-  def util: DoobieUtil[IO] =
-    new DoobieUtil[IO] {
+  implicit def util: Doobie[IO] =
+    new Doobie[IO] {
 
-      override def read[T](sqlStatement: query.Query0[T]): IO[Option[T]] =
-        sqlStatement.option.transact(transactor)
+      override def option[T](query: Query0[T]): IO[Option[T]] =
+        query.option.transact(transactor)
 
-      override def readStreams[T](
-        sqlStatement: query.Query0[T]
+      override def stream[T](
+        query: Query0[T]
       ): fs2.Stream[IO, T] =
-        sqlStatement.stream.transact(transactor)
+        query.stream.transact(transactor)
 
-      override def readList[T](sqlStatement: query.Query0[T]): IO[List[T]] =
-        sqlStatement.stream.compile.toList.transact(transactor)
+      override def list[T](query: Query0[T]): IO[List[T]] =
+        query.stream.compile.toList.transact(transactor)
 
-      override def write(sqlStatement: update.Update0): IO[Int] =
-        sqlStatement.run.transact(transactor)
+      override def command(command: Update0): IO[Int] =
+        command.run.transact(transactor)
     }
 
-  def createTable(sqlStatement: update.Update0): IO[Unit] =
+  def createTable(sqlStatement: Update0): IO[Unit] =
     sqlStatement.run.transact(transactor).void
 
   override protected def beforeAll: Unit = container.start
