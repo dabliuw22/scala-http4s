@@ -56,6 +56,6 @@ final class DoobieProductRepositoryItSpec extends PostgresItSpec {
            |    stock FLOAT8 NOT NULL
            |)
            |""".stripMargin.update
-    ).unsafeRunSync
+    )
   }
 }
