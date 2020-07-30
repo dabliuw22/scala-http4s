@@ -11,8 +11,7 @@ final class DoobieProductRepositoryItSpec extends PostgresItSpec {
 
   val product: Product = Product("test_product", 10)
 
-  val repository: IO[ProductRepository[IO]] =
-    DoobieProductRepository.make[IO]
+  val repository: IO[ProductRepository[IO]] = DoobieProductRepository.make[IO]
 
   "DoobieProductRepository.findBy" should {
     "Return One Record" in {
@@ -31,7 +30,7 @@ final class DoobieProductRepositoryItSpec extends PostgresItSpec {
       val effect = for {
         repo <- repository
         result <- repo.findBy(UUID.randomUUID.toString)
-        status = result == None
+        status = result.isEmpty
       } yield assert(status)
       effect.unsafeToFuture
     }

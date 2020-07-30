@@ -22,9 +22,9 @@ object ApiMonix extends TaskApp {
 
   override def run(args: List[String]): Task[ExitCode] =
     DoobieConfiguration[Task].transactor
-      .use { implicit transactor =>
+      .use { transactor =>
         Doobie
-          .make[Task]
+          .make[Task](transactor)
           .flatMap { implicit doobie =>
             for {
               conf <- config.load[Task]
