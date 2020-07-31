@@ -25,6 +25,7 @@ final class DefaultProductService[P[_]: Effect: MonadThrow](
 ) extends ProductService[P] {
   import cats.syntax.monadError._
   import cats.syntax.functor._
+  import cats.syntax.applicativeError._
 
   override def get(id: String): P[Product] =
     productRepository
@@ -34,9 +35,9 @@ final class DefaultProductService[P[_]: Effect: MonadThrow](
         case _ =>
           throw ProductNotFoundException(s"Not Found Product By Id: $id")
       }
-      .adaptError {
-        case e => ProductNotFoundException(e.getMessage)
-      }
+      .handleError(e =>
+        throw ProductNotFoundException(s"Not Found Product By Id: $id")
+      )
 
   override def getAll: P[List[Product]] =
     productRepository.findAll

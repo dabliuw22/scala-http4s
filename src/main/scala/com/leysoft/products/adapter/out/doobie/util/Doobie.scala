@@ -2,7 +2,6 @@ package com.leysoft.products.adapter.out.doobie.util
 
 import cats.effect.{Async, ContextShift}
 import cats.syntax.apply._
-import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import doobie.util.query.Query0
 import doobie.util.transactor.Transactor
