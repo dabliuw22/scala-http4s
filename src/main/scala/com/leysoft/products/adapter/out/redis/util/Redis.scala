@@ -1,7 +1,6 @@
 package com.leysoft.products.adapter.out.redis.util
 
 import cats.effect.Effect
-import cats.syntax.apply._
 import cats.syntax.functor._
 import dev.profunktor.redis4cats.algebra.RedisCommands
 import simulacrum.typeclass
@@ -14,11 +13,17 @@ trait Redis[P[_]] {
     decoder: Decoder[A]
   ): P[Option[A]]
 
-  def hmSet[A](key: String, value: A, expiration: FiniteDuration)(implicit
+  def hmSet[A](key: String, value: A)(implicit
     encoder: Encoder[A]
   ): P[Unit]
 
+  def hGet(key: String, field: String): P[Option[String]]
+
+  def hSet(key: String, field: String, value: String): P[Unit]
+
   def hDel(key: String, fields: String*): P[Unit]
+
+  def expire(key: String, expiration: FiniteDuration): P[Unit]
 }
 
 object Redis {
@@ -32,6 +37,7 @@ object Redis {
     commands: RedisCommands[P, String, String]
   ): Redis[P] =
     new Redis[P] {
+
       override def hmGet[A](key: String, fields: String*)(implicit
         decoder: Decoder[A]
       ): P[Option[A]] =
@@ -39,16 +45,24 @@ object Redis {
           .hmGet(key, fields.distinct: _*)
           .map(decoder.decode)
 
-      override def hmSet[A](key: String, value: A, expiration: FiniteDuration)(
-        implicit encoder: Encoder[A]
+      override def hmSet[A](key: String, value: A)(implicit
+        encoder: Encoder[A]
       ): P[Unit] =
         commands
-          .hmSet(key, encoder.encode(value)) *> commands
-          .expire(key, expiration)
+          .hmSet(key, encoder.encode(value))
+
+      override def hGet(key: String, field: String): P[Option[String]] =
+        commands.hGet(key, field)
+
+      override def hSet(key: String, field: String, value: String): P[Unit] =
+        commands.hSet(key, field, value)
 
       override def hDel(key: String, fields: String*): P[Unit] =
         commands
           .hDel(key, fields.distinct: _*)
+
+      override def expire(key: String, expiration: FiniteDuration): P[Unit] =
+        commands.expire(key, expiration)
     }
 }
 

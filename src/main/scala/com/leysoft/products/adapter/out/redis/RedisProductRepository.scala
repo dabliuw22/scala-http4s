@@ -9,6 +9,7 @@ import scala.concurrent.duration._
 final class RedisProductRepository[P[_]: Effect: Redis] private (
 ) extends ProductRepository[P] {
   import RedisProductRepository._
+  import cats.syntax.apply._
   import cats.syntax.applicativeError._
   import cats.syntax.functor._
 
@@ -22,8 +23,8 @@ final class RedisProductRepository[P[_]: Effect: Redis] private (
     fs2.Stream.emits(List[Product]()).covary[P]
 
   override def save(product: Product): P[Int] =
-    Redis[P]
-      .hmSet(product.id, product, expiration)
+    (Redis[P].hmSet(product.id, product) <*
+      Redis[P].expire(product.id, expiration))
       .map(_ => 1)
       .handleError(_ => 0)
 
