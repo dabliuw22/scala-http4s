@@ -10,6 +10,6 @@ case class Product(
 
 object Product {
 
-  def apply(name: String, stock: Double): Product =
+  def make(name: String, stock: Double): Product =
     new Product(name = name, stock = stock)
 }

@@ -9,7 +9,7 @@ import doobie.implicits._
 
 final class DoobieProductRepositoryItSpec extends PostgresItSpec {
 
-  val product: Product = Product("test_product", 10)
+  val product: Product = Product.make("test_product", 10)
 
   val repository: IO[ProductRepository[IO]] = DoobieProductRepository.make[IO]
 
