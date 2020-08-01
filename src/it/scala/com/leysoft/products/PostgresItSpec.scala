@@ -4,7 +4,6 @@ import cats.effect.IO
 import com.dimafeng.testcontainers.PostgreSQLContainer
 import com.leysoft.products.adapter.out.doobie.util.Doobie
 import doobie.implicits._
-import doobie.util.query.Query0
 import doobie.util.update.Update0
 import doobie.util.transactor.Transactor
 
@@ -19,6 +18,8 @@ abstract class PostgresItSpec extends ContainerItSpec {
     )
     .createContainer
 
+  container.start
+
   private lazy val transactor: Transactor[IO] =
     Transactor.fromDriverManager[IO](
       driver = "org.postgresql.Driver",
@@ -28,28 +29,11 @@ abstract class PostgresItSpec extends ContainerItSpec {
       blocker = blocker
     )
 
-  implicit def util: Doobie[IO] =
-    new Doobie[IO] {
+  protected implicit def util: Doobie[IO] =
+    Doobie.make[IO](transactor).unsafeRunSync
 
-      override def option[T](query: Query0[T]): IO[Option[T]] =
-        query.option.transact(transactor)
-
-      override def stream[T](
-        query: Query0[T]
-      ): fs2.Stream[IO, T] =
-        query.stream.transact(transactor)
-
-      override def list[T](query: Query0[T]): IO[List[T]] =
-        query.stream.compile.toList.transact(transactor)
-
-      override def command(command: Update0): IO[Int] =
-        command.run.transact(transactor)
-    }
-
-  def createTable(sqlStatement: Update0): IO[Unit] =
-    sqlStatement.run.transact(transactor).void
-
-  override protected def beforeAll: Unit = container.start
+  protected def createTable(table: Update0): Unit =
+    table.run.transact(transactor).void.unsafeRunSync
 
   override protected def afterAll: Unit = container.stop
 }

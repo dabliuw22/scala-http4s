@@ -1,38 +1,37 @@
 package com.leysoft.products.adapter.out.redis
 
 import cats.effect.Effect
-import com.leysoft.products.adapter.out.redis.util.RedisUtil
-import com.leysoft.products.domain
-import com.leysoft.products.domain.ProductRepository
+import com.leysoft.products.adapter.out.redis.util.{Decoder, Encoder, Redis}
+import com.leysoft.products.domain.{Product, ProductRepository}
 
 import scala.concurrent.duration._
 
-final class RedisProductRepository[P[_]: Effect] private (
-  redisUtil: RedisUtil[P]
+final class RedisProductRepository[P[_]: Effect: Redis] private (
 ) extends ProductRepository[P] {
   import RedisProductRepository._
+  import cats.syntax.apply._
   import cats.syntax.applicativeError._
   import cats.syntax.functor._
 
-  override def findBy(id: String): P[Option[domain.Product]] =
-    redisUtil
-      .hmGet(id, fa, idField, nameField, stockName)
+  override def findBy(id: String): P[Option[Product]] =
+    Redis[P]
+      .hmGet(id, idField, nameField, stockName)
 
-  override def findAll: P[List[domain.Product]] = Effect[P].delay(List())
+  override def findAll: P[List[Product]] = Effect[P].delay(List())
 
-  override def findAllAStreams: fs2.Stream[P, domain.Product] =
-    fs2.Stream.emits(List[domain.Product]()).covary[P]
+  override def findAllAStreams: fs2.Stream[P, Product] =
+    fs2.Stream.emits(List[Product]()).covary[P]
 
-  override def save(product: domain.Product): P[Int] =
-    redisUtil
-      .hmSet(product.id, fb(product), expiration)
+  override def save(product: Product): P[Int] =
+    (Redis[P].hmSet(product.id, product) <*
+      Redis[P].expire(product.id, expiration))
       .map(_ => 1)
       .handleError(_ => 0)
 
-  override def update(product: domain.Product): P[Int] = save(product)
+  override def update(product: Product): P[Int] = save(product)
 
   override def delete(id: String): P[Int] =
-    redisUtil
+    Redis[P]
       .hDel(id, nameField, stockName)
       .map(_ => 1)
       .handleError(_ => 0)
@@ -48,7 +47,7 @@ object RedisProductRepository {
 
   private val expiration = 10 minutes
 
-  private val fa: Map[String, String] => Option[domain.Product] = hash =>
+  private implicit val decoder: Decoder[Product] = hash =>
     hash
       .get(idField)
       .flatMap(id =>
@@ -57,19 +56,17 @@ object RedisProductRepository {
           .flatMap(name =>
             hash
               .get(stockName)
-              .map(stock => domain.Product(id, name, stock.toDouble))
+              .map(stock => Product(id, name, stock.toDouble))
           )
       )
 
-  private val fb: domain.Product => Map[String, String] = product =>
+  private implicit val encoder: Encoder[Product] = product =>
     Map(
       idField -> product.id,
       nameField -> product.name,
       stockName -> product.stock.toString
     )
 
-  def make[P[_]: Effect](
-    commands: RedisUtil[P]
-  ): P[RedisProductRepository[P]] =
-    Effect[P].delay(new RedisProductRepository(commands))
+  def make[P[_]: Effect: Redis]: P[RedisProductRepository[P]] =
+    Effect[P].delay(new RedisProductRepository)
 }
