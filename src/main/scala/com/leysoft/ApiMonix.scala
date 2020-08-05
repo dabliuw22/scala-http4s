@@ -1,6 +1,6 @@
 package com.leysoft
 
-import cats.effect.{ContextShift, ExitCode, Timer}
+import cats.effect.{Blocker, ContextShift, ExitCode, Timer}
 import com.leysoft.products.adapter.auth.Auth.{AuthService, InMemoryUserRepository}
 import com.leysoft.products.adapter.in.api.{LoginRoute, ProductRoute}
 import com.leysoft.products.adapter.in.api.error.ErrorHandler
@@ -21,37 +21,40 @@ object ApiMonix extends TaskApp {
   implicit val timer: Timer[Task] = Task.timer(Scheduler.io())
 
   override def run(args: List[String]): Task[ExitCode] =
-    DoobieConfiguration[Task].transactor
-      .use { transactor =>
-        Doobie
-          .make[Task](transactor)
-          .flatMap { implicit doobie =>
-            for {
-              conf <- config.load[Task]
-              repository <- DoobieProductRepository.make[Task]
-              service <- DefaultProductService.make[Task](repository)
-              error <- ErrorHandler.make[Task]
-              handler <- error.handler
-              userRepository <- InMemoryUserRepository.make[Task]
-              auth <- AuthService.make[Task](conf.auth, userRepository)
-              middleware <- auth.middleware
-              login <- LoginRoute.make[Task](auth)
-              api <- ProductRoute.make[Task](service)
-              _ <- BlazeServerBuilder[Task]
-                     .bindHttp(
-                       port = conf.api.port.value,
-                       host = conf.api.host.value
-                     )
-                     .withHttpApp(
-                       CORS {
-                         (api.routes(middleware, handler) <+> login
-                           .routes(handler)).orNotFound
-                       }
-                     )
-                     .serve
-                     .compile
-                     .drain
-            } yield ExitCode.Success
-          }
-      }
+    Blocker[Task].use { blocker =>
+      DoobieConfiguration[Task]
+        .transactor(blocker)
+        .use { transactor =>
+          Doobie
+            .make[Task](transactor)
+            .flatMap { implicit doobie =>
+              for {
+                conf <- config.load[Task]
+                repository <- DoobieProductRepository.make[Task]
+                service <- DefaultProductService.make[Task](repository)
+                error <- ErrorHandler.make[Task]
+                handler <- error.handler
+                userRepository <- InMemoryUserRepository.make[Task]
+                auth <- AuthService.make[Task](conf.auth, userRepository)
+                middleware <- auth.middleware
+                login <- LoginRoute.make[Task](auth)
+                api <- ProductRoute.make[Task](service)
+                _ <- BlazeServerBuilder[Task]
+                       .bindHttp(
+                         port = conf.api.port.value,
+                         host = conf.api.host.value
+                       )
+                       .withHttpApp(
+                         CORS {
+                           (api.routes(middleware, handler) <+> login
+                             .routes(handler)).orNotFound
+                         }
+                       )
+                       .serve
+                       .compile
+                       .drain
+              } yield ExitCode.Success
+            }
+        }
+    }
 }

@@ -4,13 +4,8 @@ import cats.effect.{Effect, Sync}
 import com.leysoft.products.adapter.config.AuthConfiguration
 import dev.profunktor.auth.JwtAuthMiddleware
 import dev.profunktor.auth.jwt._
-import io.circe.{Decoder, Encoder, Json}
-import org.http4s.Response
 import org.http4s.server.AuthMiddleware
-import pdi.jwt.algorithms.JwtHmacAlgorithm
 import pdi.jwt.{JwtAlgorithm, JwtClaim}
-
-import scala.concurrent.duration.FiniteDuration
 
 object Auth {
   import Codecs._

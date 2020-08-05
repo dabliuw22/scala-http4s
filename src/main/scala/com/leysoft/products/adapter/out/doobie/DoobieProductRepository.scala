@@ -23,14 +23,16 @@ final class DoobieProductRepository[P[_]: Effect: Doobie] private (
   override def save(product: Product): P[Int] =
     Doobie[P]
       .command(
-        sql"INSERT INTO products VALUES(${product.id}, ${product.name}, ${product.stock})".update
+        sql"""INSERT INTO products
+             |VALUES(${product.id}, ${product.name}, ${product.stock})""".stripMargin.update
       )
 
   override def update(product: Product): P[Int] =
     Doobie[P]
       .command(
-        sql"""UPDATE products SET name = ${product.name}, stock = ${product.stock}
-                 WHERE id = ${product.id}""".update
+        sql"""UPDATE products
+             |SET name = ${product.name}, stock = ${product.stock}
+             |WHERE id = ${product.id}""".stripMargin.update
       )
 
   override def delete(id: String): P[Int] =

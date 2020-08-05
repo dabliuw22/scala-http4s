@@ -20,16 +20,16 @@ final case class DoobieConfiguration[P[_]: Async: ContextShift]() {
 
   private val threadSize: Int Refined Interval.Open[0, 32] = 10
 
-  lazy val transactor: Resource[P, HikariTransactor[P]] = for {
-    context <- ExecutionContexts.fixedThreadPool[P](threadSize)
-    blocker <- Blocker[P]
-    hikari <- HikariTransactor.newHikariTransactor[P](
-                driverClassName = driver,
-                url = url,
-                user = user,
-                pass = password,
-                connectEC = context,
-                blocker = blocker
-              )
-  } yield hikari
+  def transactor(block: Blocker): Resource[P, HikariTransactor[P]] =
+    for {
+      context <- ExecutionContexts.fixedThreadPool[P](threadSize)
+      hikari <- HikariTransactor.newHikariTransactor[P](
+                  driverClassName = driver,
+                  url = url,
+                  user = user,
+                  pass = password,
+                  connectEC = context,
+                  blocker = block
+                )
+    } yield hikari
 }
