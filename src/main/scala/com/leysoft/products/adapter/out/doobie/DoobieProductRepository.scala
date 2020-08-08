@@ -23,10 +23,10 @@ final class DoobieProductRepository[P[_]: Effect: Doobie] private (
     Doobie[P].command(insert(product))
 
   override def update(product: Product): P[Int] =
-    Doobie[P].command(updated(product))
+    Doobie[P].command(upd(product))
 
   override def delete(id: String): P[Int] =
-    Doobie[P].command(deleted(id))
+    Doobie[P].command(del(id))
 }
 
 object DoobieProductRepository {
@@ -45,11 +45,11 @@ object DoobieProductRepository {
     sql"""INSERT INTO products
          |VALUES (${product.id}, ${product.name}, ${product.stock})""".stripMargin.update
 
-  private def updated(product: Product): Update0 =
+  private def upd(product: Product): Update0 =
     sql"""UPDATE products
          |SET name = ${product.name}, stock = ${product.stock}
          |WHERE id = ${product.id}""".stripMargin.update
 
-  private def deleted(id: String): Update0 =
+  private def del(id: String): Update0 =
     sql"DELETE FROM products WHERE id = $id".update
 }
