@@ -1,21 +1,24 @@
 name: Scala CI
-
 on:
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up Scala
       uses: olafurpg/setup-scala@v2
+    - name: Cache SBT
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/coursier/v1
+            ~/.sbt
+          key: sbt-${{ hashFiles('**/build.sbt') }}
     - name: Run tests
       run: sbt test
-    - name: Run ittest
+    - name: Run it test
       run: sbt it:test
