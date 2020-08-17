@@ -19,8 +19,9 @@ final class DoobieProductRepositoryItSpec extends PostgresItSpec {
         repo <- repository
         _ <- repo.save(product)
         result <- repo.findBy(product.id)
-        status = result.map(r => (r.id, r.name, r.stock))
-          .contains((product.id, product.name, product.stock))
+        status = result
+                   .map(r => (r.id, r.name, r.stock))
+                   .contains((product.id, product.name, product.stock))
       } yield assert(status)
       effect.unsafeToFuture
     }
