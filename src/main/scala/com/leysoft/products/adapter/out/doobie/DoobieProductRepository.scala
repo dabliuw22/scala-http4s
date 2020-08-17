@@ -8,8 +8,6 @@ import doobie.util.update.Update0
 
 final class DoobieProductRepository[P[_]: Effect: Doobie] private (
 ) extends ProductRepository[P] {
-  import doobie.implicits._
-  import doobie.implicits.javatime._
   import DoobieProductRepository._
 
   override def findBy(id: String): P[Option[Product]] =
@@ -33,6 +31,7 @@ final class DoobieProductRepository[P[_]: Effect: Doobie] private (
 
 object DoobieProductRepository {
   import doobie.implicits._
+  import doobie.implicits.javatime._
 
   def make[P[_]: Effect: Doobie]: P[DoobieProductRepository[P]] =
     Effect[P].delay(new DoobieProductRepository[P])
