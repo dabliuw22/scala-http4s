@@ -44,7 +44,8 @@ object DoobieProductRepository {
 
   private def insert(product: Product): Update0 =
     sql"""INSERT INTO products
-         |VALUES (${product.id}, ${product.name}, ${product.stock})""".stripMargin.update
+          |VALUES(${product.id}, ${product.name},
+          |${product.stock}, ${product.createdAt})""".stripMargin.update
 
   private def upd(product: Product): Update0 =
     sql"""UPDATE products

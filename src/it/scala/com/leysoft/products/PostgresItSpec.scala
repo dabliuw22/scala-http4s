@@ -32,7 +32,7 @@ abstract class PostgresItSpec extends ContainerItSpec {
   protected implicit def util: Doobie[IO] =
     Doobie.make[IO](transactor).unsafeRunSync
 
-  protected def createTable(table: Update0): Unit =
+  protected def run(table: Update0): Unit =
     table.run.transact(transactor).void.unsafeRunSync
 
   override protected def afterAll: Unit = container.stop
