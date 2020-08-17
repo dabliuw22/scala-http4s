@@ -2,7 +2,9 @@ package com.leysoft.products.adapter.out.redis.util
 
 import cats.effect.Effect
 import cats.syntax.functor._
-import dev.profunktor.redis4cats.algebra.RedisCommands
+import cats.syntax.apply._
+import dev.profunktor.redis4cats.RedisCommands
+import io.chrisdavenport.log4cats.slf4j.Slf4jLogger
 import simulacrum.typeclass
 
 import scala.concurrent.duration.FiniteDuration
@@ -38,31 +40,40 @@ object Redis {
   ): Redis[P] =
     new Redis[P] {
 
+      private val logger =
+        Slf4jLogger.getLoggerFromClass[P](this.getClass)
+
       override def hmGet[A](key: String, fields: String*)(implicit
         decoder: Decoder[A]
       ): P[Option[A]] =
-        commands
-          .hmGet(key, fields.distinct: _*)
-          .map(decoder.decode)
+        logger.info(s"hmGet: $key") *>
+          commands
+            .hmGet(key, fields.distinct: _*)
+            .map(decoder.decode)
 
       override def hmSet[A](key: String, value: A)(implicit
         encoder: Encoder[A]
       ): P[Unit] =
-        commands
-          .hmSet(key, encoder.encode(value))
+        logger.info(s"hmSet: $key") *>
+          commands
+            .hmSet(key, encoder.encode(value))
 
       override def hGet(key: String, field: String): P[Option[String]] =
-        commands.hGet(key, field)
+        logger.info(s"hGet: $key") *>
+          commands.hGet(key, field)
 
       override def hSet(key: String, field: String, value: String): P[Unit] =
-        commands.hSet(key, field, value)
+        logger.info(s"hSet: $key") *>
+          commands.hSet(key, field, value)
 
       override def hDel(key: String, fields: String*): P[Unit] =
-        commands
-          .hDel(key, fields.distinct: _*)
+        logger.info(s"hDel: $key") *>
+          commands
+            .hDel(key, fields.distinct: _*)
 
       override def expire(key: String, expiration: FiniteDuration): P[Unit] =
-        commands.expire(key, expiration)
+        logger.info(s"expire: $key") *>
+          commands.expire(key, expiration)
     }
 }
 

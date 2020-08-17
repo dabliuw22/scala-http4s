@@ -1,6 +1,6 @@
 package com.leysoft.products.adapter.out.doobie.util
 
-import cats.effect.{Async, ContextShift}
+import cats.effect.{Async, ContextShift, Sync}
 import cats.syntax.apply._
 import doobie.implicits._
 import doobie.util.query.Query0
@@ -23,12 +23,12 @@ trait Doobie[P[_]] {
 
 object Doobie {
 
-  def make[P[_]: Async: ContextShift](
+  def make[P[_]: Sync](
     transactor: Transactor[P]
   ): P[Doobie[P]] =
-    Async[P].delay(doobie(transactor))
+    Sync[P].delay(doobie(transactor))
 
-  private def doobie[P[_]: Async: ContextShift](
+  private def doobie[P[_]: Sync](
     transactor: Transactor[P]
   ): Doobie[P] =
     new Doobie[P] {
