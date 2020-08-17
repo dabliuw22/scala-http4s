@@ -22,3 +22,7 @@ TAGS
 tests.iml
 .DS_Store
 config/
+.metals/
+.bloop/
+.ammonite/
+project/metals.sbt
