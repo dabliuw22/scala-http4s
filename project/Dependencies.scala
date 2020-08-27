@@ -17,6 +17,8 @@ object Dependencies {
   def cats(artifact: String): ModuleID = "org.typelevel" %% artifact % "2.1.1"
   def simulacrum(artifact: String): ModuleID = "org.typelevel" %% artifact % "1.0.0"
   def refined(artifact: String): ModuleID = "eu.timepit" %% artifact % "0.9.13"
+  def monocle(artifact: String): ModuleID =
+    "com.github.julien-truffaut" %% artifact  % "2.0.3"
   def monix(artifact: String): ModuleID = "io.monix" %% artifact % "3.2.2"
   def fs2(artifact: String): ModuleID = "co.fs2" %% artifact % "2.4.2"
   def doobie(artifact: String): ModuleID = "org.tpolecat" %% artifact % "0.9.0"
@@ -47,6 +49,8 @@ object Dependencies {
     simulacrum("simulacrum"),
     refined("refined"),
     refined("refined-cats"),
+    monocle("monocle-core"),
+    monocle("monocle-macro"),
     monix("monix-eval"),
     monix("monix-execution"),
     fs2("fs2-core"),
