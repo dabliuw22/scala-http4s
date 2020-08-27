@@ -1,5 +1,6 @@
 package com.leysoft.products.adapter.auth
 
+import cats.effect.concurrent.Ref
 import cats.effect.{Effect, Sync}
 import com.leysoft.products.adapter.config.AuthConfiguration
 import dev.profunktor.auth.JwtAuthMiddleware
@@ -33,31 +34,58 @@ object Auth {
   sealed trait AuthRepository[P[_]] {
 
     def findBy(username: AuthUserUsername): P[AuthUser]
+
+    def save(user: AuthUser): P[Unit]
+
+    def update(user: AuthUser): P[Unit]
   }
 
-  final class InMemoryUserRepository[P[_]: Effect] private ()
+  type Store[P[_]] = Ref[P, Map[AuthUserUsername, AuthUser]]
+
+  final class InMemoryUserRepository[P[_]: Effect] private (store: Store[P])
       extends AuthRepository[P] {
 
-    private val users = collection.mutable.Map[AuthUserUsername, AuthUser](
-      "username1" -> AuthUser("username1", "password1"),
-      "username2" -> AuthUser("username2", "password2"),
-      "username3" -> AuthUser("username3", "password3")
-    )
-
     override def findBy(username: AuthUserUsername): P[AuthUser] =
-      Effect[P]
-        .delay(users.get(username))
+      store.get
+        .map(_.get(username))
         .map {
           case Some(user) => user
           case _ =>
             throw AuthUserNotFoundException(s"Not Found User: $username")
         }
+
+    override def save(user: AuthUser): P[Unit] =
+      store.get
+        .map(_.get(user.username))
+        .flatMap {
+          case Some(_) =>
+            throw AuthUserException(s"Not Saved User: ${user.username}")
+          case _ =>
+            store.get.map(_.updated(user.username, user))
+        }
+
+    override def update(user: AuthUser): P[Unit] =
+      store.get
+        .map(_.get(user.username))
+        .flatMap {
+          case Some(_) => store.get.map(_.updated(user.username, user))
+          case _ =>
+            throw AuthUserException(s"Not Updated User: ${user.username}")
+        }
   }
 
   object InMemoryUserRepository {
 
+    private val initUsers = Map(
+      "username1" -> AuthUser("username1", "password1"),
+      "username2" -> AuthUser("username2", "password2"),
+      "username3" -> AuthUser("username3", "password3")
+    )
+
     def make[P[_]: Effect]: P[AuthRepository[P]] =
-      Effect[P].delay(new InMemoryUserRepository[P])
+      Ref
+        .of(initUsers)
+        .map(new InMemoryUserRepository[P](_))
   }
 
   case class User(username: AuthUserUsername)
