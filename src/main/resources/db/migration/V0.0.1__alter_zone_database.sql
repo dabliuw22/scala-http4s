@@ -1,0 +1,1 @@
+ALTER DATABASE http4s_db SET timezone TO 'America/Bogota';

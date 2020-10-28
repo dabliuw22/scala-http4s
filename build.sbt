@@ -8,7 +8,7 @@ lazy val options = Seq(
   "-unchecked",
   "-language:postfixOps",
   "-language:higherKinds", // or import scala.language.higherKinds
-  "-Ymacro-annotations", // for newtype and simulacrum
+  "-Ymacro-annotations" // for newtype and simulacrum
 )
 
 lazy val commonSettings = Seq(

@@ -10,40 +10,61 @@ Requirements:
    * Docker Compose
    
 1. Run Containers:
-    `docker-compose up -d`
+    ```[shell script]
+    $ docker-compose up -d
+    ```
 
 2. Run App.
-    * Run Migration: `sbt flywayMigrate`
-    * Compile: `sbt compile run`
-    * Assembly: `sbt assembly`
-    * Test: `sbt test`
-    * Integration Test: `sbt it:test`
+    * Run Migration: 
+        ```[shell script]
+        $ sbt flywayMigrate
+        ```
+    * Compile: 
+        ```[shell script]
+        $ sbt compile run
+        ```
+    * Assembly: 
+        ```[shell script]
+        $ sbt assembly
+        ```
+    * Test: 
+        ```[shell script]
+        $ sbt test
+        ```
+    * Integration Test: 
+        ```[shell script]
+        $ sbt it:test
+        ```
+    * Apply Formatter: 
+        ```[shell script]
+        $ sbt scalafmtSbt
+        $ sbt scalafmtAll
+        ```
 
 3. Test with cURL:
     * Login:
         ```
-        curl --location --request POST 'http://localhost:8080/login' \
+        $ curl --location --request POST 'http://localhost:8080/login' \
         --header 'Content-Type: application/json' \
         --data-raw '{
         	"username": "username1",
         	"password": "password1"
         }'
         ```
-      
 
     * All Products:
         ```
-        curl --location --request GET 'http://localhost:8080/products' \
+        $ curl --location --request GET 'http://localhost:8080/products' \
         --header 'Authorization: Bearer ${YOUR_ACCESS_TOKEN}'
         ```
     * Get Product By ID:
         ```
-        curl --location --request GET 'http://localhost:8080/products/{UUID}' \
+        $ curl --location --request GET 'http://localhost:8080/products/{UUID}' \
         --header 'Authorization: Bearer ${YOUR_ACCESS_TOKEN}'
         ```
     * Create Product:
         ```
-        curl --location --request POST 'http://localhost:8080/products' \
+        $ curl --location --request POST 'http://localhost:8080/products' \
         --header 'Content-Type: application/json' \
         --header 'Authorization: Bearer ${YOUR_ACCESS_TOKEN}' \
         --data-raw '{
@@ -53,7 +74,7 @@ Requirements:
         ```
     * Update Product:
         ```
-        curl --location --request PUT 'http://localhost:8080/products/{UUID}' \
+        $ curl --location --request PUT 'http://localhost:8080/products/{UUID}' \
         --header 'Content-Type: application/json' \
         --header 'Authorization: Bearer ${YOUR_ACCESS_TOKEN}' \
         --data-raw '{
