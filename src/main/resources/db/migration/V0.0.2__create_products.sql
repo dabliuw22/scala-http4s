@@ -1,5 +1,6 @@
 CREATE TABLE products (
     id VARCHAR PRIMARY KEY,
     name VARCHAR NOT NULL,
-    stock FLOAT8 NOT NULL
+    stock FLOAT8 NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL
 );

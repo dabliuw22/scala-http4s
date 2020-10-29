@@ -1,8 +1,7 @@
 package com.leysoft.products.adapter.out.skunk
 
 import cats.effect.Effect
-import com.leysoft.products.domain
-import com.leysoft.products.domain.ProductRepository
+import com.leysoft.products.domain.{Product, ProductRepository}
 import fs2.Stream
 import skunk.Session
 import skunk.data.Completion
@@ -14,29 +13,29 @@ final class SkunkProductRepository[P[_]: Effect] private (implicit
   import cats.syntax.functor._
   import skunk.Void
 
-  override def findBy(id: String): P[Option[domain.Product]] =
+  override def findBy(id: String): P[Option[Product]] =
     session
       .prepare(byId)
       .use(prepared => prepared.option(id))
 
-  override def findAll: P[List[domain.Product]] = session.execute(all)
+  override def findAll: P[List[Product]] = session.execute(all)
 
-  override def findAllAStreams: Stream[P, domain.Product] =
+  override def findAllAStreams: Stream[P, Product] =
     for {
       prepared <- Stream.resource(session.prepare(all))
       stream <- prepared.stream(Void, 64)
     } yield stream
 
-  override def save(product: domain.Product): P[Int] =
+  override def save(product: Product): P[Int] =
     session
       .prepare(ins)
       .use { prepared =>
         prepared
-          .execute((product.id, product.name), product.stock)
+          .execute(product)
           .map { case Completion.Insert(count) => count }
       }
 
-  override def update(product: domain.Product): P[Int] =
+  override def update(product: Product): P[Int] =
     session
       .prepare(upd)
       .use { prepared =>
@@ -68,23 +67,34 @@ object SkunkProductRepository {
   ): P[SkunkProductRepository[P]] =
     Effect[P].delay(new SkunkProductRepository)
 
-  def all: Query[Void, domain.Product] =
+  private def all: Query[Void, Product] =
     sql"SELECT * FROM products"
-      .query(varchar ~ varchar ~ float8)
-      .map { case id ~ name ~ stock => domain.Product(id, name, stock) }
+      .query(varchar ~ varchar ~ float8 ~ timestamptz)
+      .map {
+        case id ~ name ~ stock ~ createdAt =>
+          Product(id, name, stock, createdAt)
+      }
 
-  def byId: Query[String, domain.Product] =
+  private def byId: Query[String, Product] =
     sql"SELECT * FROM products WHERE id = $varchar"
-      .query(varchar ~ varchar ~ float8)
-      .map { case id ~ name ~ stock => domain.Product(id, name, stock) }
+      .query(varchar ~ varchar ~ float8 ~ timestamptz)
+      .map {
+        case id ~ name ~ stock ~ createdAt =>
+          Product(id, name, stock, createdAt)
+      }
 
-  def ins: Command[String ~ String ~ Double] =
-    sql"INSERT INTO products VALUES($varchar, $varchar, $float8)".command
+  private def ins: Command[Product] =
+    sql"""INSERT INTO products(id, name, stock, created_at)
+           VALUES($varchar, $varchar, $float8, $timestamptz)""".command
+      .contramap {
+        case Product(i, n, s, c) =>
+          i ~ n ~ s ~ c
+      }
 
-  def upd: Command[String ~ Double ~ String] =
+  private def upd: Command[String ~ Double ~ String] =
     sql"""UPDATE products SET name = $varchar, stock = $float8
          WHERE id = $varchar""".command
 
-  def del: Command[String] =
+  private def del: Command[String] =
     sql"DELETE FROM products WHERE id = $varchar".command
 }

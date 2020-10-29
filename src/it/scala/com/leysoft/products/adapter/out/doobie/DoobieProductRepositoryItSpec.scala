@@ -19,7 +19,9 @@ final class DoobieProductRepositoryItSpec extends PostgresItSpec {
         repo <- repository
         _ <- repo.save(product)
         result <- repo.findBy(product.id)
-        status = result == Option(product)
+        status = result
+                   .map(r => (r.id, r.name, r.stock))
+                   .contains((product.id, product.name, product.stock))
       } yield assert(status)
       effect.unsafeToFuture
     }
@@ -41,19 +43,19 @@ final class DoobieProductRepositoryItSpec extends PostgresItSpec {
       val effect = for {
         repo <- repository
         result <- repo.findAll
-        status = result == List(product)
+        status = result.size == 1
       } yield assert(status)
       effect.unsafeToFuture
     }
   }
 
   override protected def beforeAll: Unit = {
-    super.beforeAll
-    createTable(
+    run(
       sql"""CREATE TABLE products (
            |    id VARCHAR PRIMARY KEY,
            |    name VARCHAR NOT NULL,
-           |    stock FLOAT8 NOT NULL
+           |    stock FLOAT8 NOT NULL,
+           |    created_at TIMESTAMP WITH TIME ZONE NOT NULL
            |)
            |""".stripMargin.update
     )

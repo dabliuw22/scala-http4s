@@ -14,6 +14,8 @@ object Codecs {
 
   private val STOCK = "stock"
 
+  private val CREATED_AT = "created_at"
+
   implicit val productDecoder: Decoder[Product] =
     // Decoder.forProduct2(NAME, STOCK)(domain.Product.apply)
     Decoder.instance[Product] { cursor =>
@@ -29,7 +31,8 @@ object Codecs {
       Json.obj(
         (ID, Json.fromString(p.id)),
         (NAME, Json.fromString(p.name)),
-        (STOCK, Json.fromDoubleOrString(p.stock))
+        (STOCK, Json.fromDoubleOrString(p.stock)),
+        (CREATED_AT, Json.fromString(p.createdAt.toString))
       )
     }
 

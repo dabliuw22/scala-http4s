@@ -31,6 +31,7 @@ final class DoobieProductRepository[P[_]: Effect: Doobie] private (
 
 object DoobieProductRepository {
   import doobie.implicits._
+  import doobie.implicits.javatime._
 
   def make[P[_]: Effect: Doobie]: P[DoobieProductRepository[P]] =
     Effect[P].delay(new DoobieProductRepository[P])
@@ -41,14 +42,14 @@ object DoobieProductRepository {
   private def getAll: Query0[Product] =
     sql"SELECT * FROM products".query[Product]
 
-  private def insert(product: Product): Update0 =
+  private def insert(p: Product): Update0 =
     sql"""INSERT INTO products
-         |VALUES (${product.id}, ${product.name}, ${product.stock})""".stripMargin.update
+         |VALUES(${p.id}, ${p.name}, ${p.stock}, ${p.createdAt})""".stripMargin.update
 
-  private def upd(product: Product): Update0 =
+  private def upd(p: Product): Update0 =
     sql"""UPDATE products
-         |SET name = ${product.name}, stock = ${product.stock}
-         |WHERE id = ${product.id}""".stripMargin.update
+         |SET name = ${p.name}, stock = ${p.stock}
+         |WHERE id = ${p.id}""".stripMargin.update
 
   private def del(id: String): Update0 =
     sql"DELETE FROM products WHERE id = $id".update

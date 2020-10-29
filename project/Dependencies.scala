@@ -15,17 +15,18 @@ object Dependencies {
   lazy val scalaTestContainersVersion = "0.37.0"
 
   def cats(artifact: String): ModuleID = "org.typelevel" %% artifact % "2.1.1"
-  def simulacrum(artifact: String): ModuleID = "org.typelevel" %% artifact % "1.0.0"
+  def simulacrum(artifact: String): ModuleID =
+    "org.typelevel" %% artifact % "1.0.1"
   def refined(artifact: String): ModuleID = "eu.timepit" %% artifact % "0.9.13"
   def monocle(artifact: String): ModuleID =
-    "com.github.julien-truffaut" %% artifact  % "2.0.3"
+    "com.github.julien-truffaut" %% artifact % "2.0.3"
   def monix(artifact: String): ModuleID = "io.monix" %% artifact % "3.2.2"
   def fs2(artifact: String): ModuleID = "co.fs2" %% artifact % "2.4.2"
-  def doobie(artifact: String): ModuleID = "org.tpolecat" %% artifact % "0.9.0"
-  def skunk(artifact: String): ModuleID = "org.tpolecat" %% artifact % "0.0.15"
+  def doobie(artifact: String): ModuleID = "org.tpolecat" %% artifact % "0.9.2"
+  def skunk(artifact: String): ModuleID = "org.tpolecat" %% artifact % "0.0.21"
   def redis4Cats(artifact: String): ModuleID =
     "dev.profunktor" %% artifact % "0.10.2"
-  def http4s(artifact: String): ModuleID = "org.http4s" %% artifact % "0.21.7"
+  def http4s(artifact: String): ModuleID = "org.http4s" %% artifact % "0.21.8"
   def http4sJwtAuth(artifact: String): ModuleID =
     "dev.profunktor" %% artifact % "0.0.4"
   def tracer(artifact: String): ModuleID =
