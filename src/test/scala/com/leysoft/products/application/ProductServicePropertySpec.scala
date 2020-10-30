@@ -7,17 +7,21 @@ import com.leysoft.products.domain.ProductRepository
 final class ProductServicePropertySpec extends PropertySpec {
   import domain.arbitraries._
 
-  def productRepository(product: domain.Product): TestProductRepository =
+  private def productRepository(
+    product: domain.Product
+  ): TestProductRepository =
     new TestProductRepository {
       override def findBy(id: String): IO[Option[domain.Product]] =
         IO.pure(Some(product))
     }
 
-  forAll { product: domain.Product =>
-    spec("GetById") {
-      new DefaultProductService[IO](productRepository(product))
-        .get(product.id)
-        .map(p => assert(p.eq(product)))
+  "DefaultProductService.get" should {
+    forAll { product: domain.Product =>
+      spec("GetById", s"Return a $product") {
+        new DefaultProductService[IO](productRepository(product))
+          .get(product.id)
+          .map(p => assert(p.eq(product)))
+      }
     }
   }
 }
