@@ -5,14 +5,13 @@ import java.util.UUID
 import cats.effect.{ContextShift, IO, Timer}
 import org.scalactic.source.Position
 import org.scalatest.Assertion
-import org.scalatest.funsuite.AsyncFunSuite
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import org.scalatestplus.scalacheck.{ScalaCheckDrivenPropertyChecks, ScalaCheckPropertyChecks}
 
 import scala.concurrent.ExecutionContext
 
 protected[products] abstract class PropertySpec
     extends Spec
-    with ScalaCheckDrivenPropertyChecks {
+    with ScalaCheckPropertyChecks {
 
   implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
