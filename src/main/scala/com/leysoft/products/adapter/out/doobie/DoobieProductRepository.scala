@@ -31,7 +31,7 @@ final class DoobieProductRepository[P[_]: Effect: Doobie] private (
 
 object DoobieProductRepository {
   import doobie.implicits._
-  import doobie.implicits.javatime._
+  import util.TimeUtil._ // or import doobie.implicits.javatime._
 
   def make[P[_]: Effect: Doobie]: P[DoobieProductRepository[P]] =
     Effect[P].delay(new DoobieProductRepository[P])
