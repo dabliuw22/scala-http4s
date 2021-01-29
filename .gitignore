@@ -1,5 +1,6 @@
 project/boot
 target/
+.bsp/
 logs/
 .ensime
 .ensime_lucene
