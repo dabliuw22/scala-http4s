@@ -32,7 +32,10 @@ final class SkunkProductRepository[P[_]: Effect] private (implicit
       .use { prepared =>
         prepared
           .execute(product)
-          .map { case Completion.Insert(count) => count }
+          .map {
+            case Completion.Insert(count) => count
+            case _                        => 0
+          }
       }
 
   override def update(product: Product): P[Int] =
@@ -44,6 +47,7 @@ final class SkunkProductRepository[P[_]: Effect] private (implicit
           .map {
             case Completion.Update(count) => count
             case Completion.Delete(count) => count
+            case _                        => 0
           }
       }
 
@@ -53,7 +57,10 @@ final class SkunkProductRepository[P[_]: Effect] private (implicit
       .use { prepared =>
         prepared
           .execute(id)
-          .map { case Completion.Delete(count) => count }
+          .map {
+            case Completion.Delete(count) => count
+            case _                        => 0
+          }
       }
 }
 
