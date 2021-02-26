@@ -1,7 +1,8 @@
 package com.leysoft.products.adapter.out.doobie.util
 
-import cats.effect.{Async, ContextShift, Sync}
+import cats.effect.Sync
 import cats.syntax.apply._
+import doobie.ConnectionIO
 import doobie.implicits._
 import doobie.util.query.Query0
 import doobie.util.transactor.Transactor
@@ -19,6 +20,8 @@ trait Doobie[P[_]] {
   def list[T](query: Query0[T]): P[List[T]]
 
   def command(command: Update0): P[Int]
+
+  def transaction[A](program: => ConnectionIO[A]): P[A]
 }
 
 object Doobie {
@@ -50,6 +53,9 @@ object Doobie {
 
       override def command(command: Update0): P[Int] =
         logger.info(s"Command: ${command.sql}") *>
-          command.run.transact(transactor)
+          transaction[Int](command.run)
+
+      override def transaction[A](program: => ConnectionIO[A]): P[A] =
+        program.transact(transactor)
     }
 }
