@@ -11,7 +11,7 @@ abstract class PostgresItSpec extends ContainerItSpec {
 
   override val container: PostgreSQLContainer = PostgreSQLContainer
     .Def(
-      dockerImageName = "postgres:11.1",
+      dockerImageName = "postgres:11",
       databaseName = "test_db",
       username = "test",
       password = "test"
