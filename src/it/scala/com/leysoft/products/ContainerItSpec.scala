@@ -18,6 +18,6 @@ trait ContainerItSpec
 
   protected implicit def timer: Timer[IO] = IO.timer(ExecutionContext.global)
 
-  protected def blocker: Blocker =
+  protected def blocker(): Blocker =
     Blocker.liftExecutionContext(ExecutionContexts.synchronous)
 }

@@ -26,7 +26,7 @@ abstract class PostgresItSpec extends ContainerItSpec {
       url = container.jdbcUrl,
       user = container.username,
       pass = container.password,
-      blocker = blocker
+      blocker = blocker()
     )
 
   protected implicit def util: Doobie[IO] =
