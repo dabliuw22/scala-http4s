@@ -2,7 +2,7 @@ import sbt._
 
 object Dependencies {
   lazy val scalaTestParent = "org.scalatest"
-  lazy val scalaTestVersion = "3.0.8"
+  lazy val scalaTestVersion = "3.2.5"
   lazy val scalaMockParent = "org.scalamock"
   lazy val scalaMockVersion = "4.4.0"
   lazy val scalaCheckParent = "org.scalacheck"
@@ -10,9 +10,9 @@ object Dependencies {
   lazy val scalaTestPlusParent = "org.scalatestplus"
   lazy val scalaTestPlusVersion = "3.1.0.1"
   lazy val testContainersParent = "org.testcontainers"
-  lazy val testContainersVersion = "1.14.3"
+  lazy val testContainersVersion = "1.15.2"
   lazy val scalaTestContainersParent = "com.dimafeng"
-  lazy val scalaTestContainersVersion = "0.37.0"
+  lazy val scalaTestContainersVersion = "0.39.3"
 
   def cats(artifact: String): ModuleID = "org.typelevel" %% artifact % "2.1.1"
   def simulacrum(artifact: String): ModuleID =
